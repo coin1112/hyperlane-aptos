@@ -1,5 +1,17 @@
 # @hyperlane-xyz/core
 
+## 5.1.0
+
+### Minor Changes
+
+- e151b5f9a: Added SDK support for ArbL2ToL1Hook/ISM for selfrelay
+- cb404cb85: Implement checkpoint fraud proofs for use in slashing
+
+### Patch Changes
+
+- 2edfa4043: fix: only evaluate dynamic revert reasons in reverting branch
+  - @hyperlane-xyz/utils@5.1.0
+
 ## 5.0.0
 
 ### Patch Changes

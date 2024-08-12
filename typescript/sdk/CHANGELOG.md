@@ -1,5 +1,23 @@
 # @hyperlane-xyz/sdk
 
+## 5.1.0
+
+### Minor Changes
+
+- d408b0d6f: Add ether's error reasoning handling to SmartProvider to show clearer error messages
+- 103e6b3e1: Deploy to zircuit
+- e151b5f9a: Added SDK support for ArbL2ToL1Hook/ISM for selfrelay
+- a49f52cc9: Deploy to solana + eclipse
+- 19f7d4fd9: Supprt passing foreignDeployments to HypERC20App constructor
+
+### Patch Changes
+
+- Updated dependencies [e151b5f9a]
+- Updated dependencies [2edfa4043]
+- Updated dependencies [cb404cb85]
+  - @hyperlane-xyz/core@5.1.0
+  - @hyperlane-xyz/utils@5.1.0
+
 ## 5.0.0
 
 ### Major Changes
