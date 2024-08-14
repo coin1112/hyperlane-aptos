@@ -7,6 +7,7 @@ members = [
   "chains/hyperlane-ethereum",
   "chains/hyperlane-fuel",
   "chains/hyperlane-sealevel",
+  "chains/hyperlane-aptos",
   "ethers-prometheus",
   "hyperlane-base",
   "hyperlane-core",
@@ -95,7 +96,9 @@ bech32 = "0.9.1"
 elliptic-curve = "0.12.3"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4.3"
-http = "*"
+# todo: coin1 revisit this
+#http = "*"
+http = "0.2.12"
 hyper = "0.14"
 hyper-tls = "0.5.0"
 hyperlane-cosmwasm-interface = "=0.0.6-rc6"
@@ -119,7 +122,9 @@ parking_lot = "0.12"
 paste = "1.0"
 pretty_env_logger = "0.5.0"
 primitive-types = "=0.12.1"
-prometheus = "0.13"
+#todo: coin1 revisit this
+#prometheus = "0.13"
+prometheus = { version = "0.13.3", default-features = false }
 protobuf = "*"
 rand = "0.8.5"
 regex = "1.5"
@@ -196,6 +201,14 @@ ya-gcp = { version = "0.11.1", features = ["storage"] }
 ## TODO: remove this
 cosmwasm-schema = "1.2.7"
 
+## For Aptos Move
+bcs = { git = "https://github.com/aptos-labs/bcs.git", rev = "d31fab9d81748e2594be5cd5cdf845786a30562d" }
+
+[workspace.dependencies.aptos-sdk]
+git = "https://github.com/movementlabsxyz/aptos-core"
+rev = "cd4e28b4723244ec932099a51061fe49aaa5890f" #hyperlane fix
+## End
+
 [workspace.dependencies.ethers]
 features = []
 git = "https://github.com/hyperlane-xyz/ethers-rs"
@@ -221,15 +234,20 @@ features = ["aws"]
 git = "https://github.com/hyperlane-xyz/ethers-rs"
 tag = "2024-04-25"
 
+# todo: coin1 can we remove this?
 [patch.crates-io.curve25519-dalek]
 branch = "v3.2.2-relax-zeroize"
 git = "https://github.com/Eclipse-Laboratories-Inc/curve25519-dalek"
 version = "3.2.2"
 
+## todo: coin1 can we simpliofy this?
+## mvmt patch; These changes are for Aptos Move
 [patch.crates-io.ed25519-dalek]
 branch = "main"
-git = "https://github.com/Eclipse-Laboratories-Inc/ed25519-dalek"
+#git = "https://github.com/Eclipse-Laboratories-Inc/ed25519-dalek"
+#version = "1.0.1"
 version = "1.0.1"
+git = "https://github.com/blockchainlover2019/ed25519-dalek"
 
 [patch.crates-io.primitive-types]
 branch = "hyperlane"
@@ -335,3 +353,9 @@ version = "=0.32.2"
 branch = "trevor/0.32.2-fork"
 git = "https://github.com/hyperlane-xyz/tendermint-rs.git"
 version = "=0.32.2"
+
+# todo: coin1 reevisit this
+[patch.crates-io]
+serde-reflection = { git = "https://github.com/aptos-labs/serde-reflection", rev = "73b6bbf748334b71ff6d7d09d06a29e3062ca075" }
+merlin = { git = "https://github.com/aptos-labs/merlin" }
+x25519-dalek = { git = "https://github.com/aptos-labs/x25519-dalek", branch = "zeroize_v1" }

@@ -74,7 +74,7 @@ pub struct AptosMerkleTreeHookIndexer(AptosMailboxIndexer);
 
 #[async_trait]
 impl Indexer<MerkleTreeInsertion> for AptosMerkleTreeHookIndexer {
-    async fn fetch_logs(
+    async fn fetch_logs_in_range(
         &self,
         range: RangeInclusive<u32>,
     ) -> ChainResult<Vec<(Indexed<MerkleTreeInsertion>, LogMeta)>> {
@@ -82,7 +82,7 @@ impl Indexer<MerkleTreeInsertion> for AptosMerkleTreeHookIndexer {
             ?range,
             "AptosMerkleTreeHookIndexer::Indexer<MerkleTreeInsertion>::fetch_logs"
         );
-        let messages = self.0.fetch_logs(range).await?;
+        let messages = self.0.fetch_logs_in_range(range).await?;
         let merkle_tree_insertions = messages
             .into_iter()
             .map(|(m, meta)| (message_to_merkle_tree_insertion(m.inner()).into(), meta))

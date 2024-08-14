@@ -315,7 +315,7 @@ impl AptosMailboxIndexer {
 
 #[async_trait]
 impl Indexer<HyperlaneMessage> for AptosMailboxIndexer {
-    async fn fetch_logs(
+    async fn fetch_logs_in_range(
         &self,
         range: RangeInclusive<u32>,
     ) -> ChainResult<Vec<(Indexed<HyperlaneMessage>, LogMeta)>> {
@@ -343,7 +343,7 @@ impl Indexer<HyperlaneMessage> for AptosMailboxIndexer {
 
 #[async_trait]
 impl Indexer<H256> for AptosMailboxIndexer {
-    async fn fetch_logs(
+    async fn fetch_logs_in_range(
         &self,
         range: RangeInclusive<u32>,
     ) -> ChainResult<Vec<(Indexed<H256>, LogMeta)>> {

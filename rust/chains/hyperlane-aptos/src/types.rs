@@ -29,7 +29,7 @@ impl From<MoveMerkleTree> for IncrementalMerkle {
         }
         let count = val.count.parse::<usize>().unwrap();
 
-        IncrementalMerkle::duplicate(branches[0..TREE_DEPTH].try_into().unwrap(), count)
+        IncrementalMerkle{branch: branches[0..TREE_DEPTH].try_into().unwrap(), count}
     }
 }
 
