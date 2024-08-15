@@ -112,6 +112,15 @@ pub enum KnownHyperlaneDomain {
     ScrollSepolia = 534351,
     Sepolia = 11155111,
     SuperpositionTestnet = 98985,
+
+    /// Aptos mainnet
+    // AptosMainnet = 14401,
+    /// Aptos testnet
+    AptosTestnet = 14402,
+    /// Aptos localnet1
+    AptosLocalnet1 = 14411,
+    /// Aptos localnet2
+    AptosLocalnet2 = 14412,
 }
 
 #[derive(Clone, Serialize)]
@@ -179,6 +188,8 @@ pub enum HyperlaneDomainProtocol {
     Sealevel,
     /// A Cosmos-based chain type which uses hyperlane-cosmos.
     Cosmos,
+    /// A Aptos chain type which uses hyperlane-aptos.
+    Aptos,
 }
 
 impl HyperlaneDomainProtocol {
@@ -189,6 +200,7 @@ impl HyperlaneDomainProtocol {
             Fuel => format!("{:?}", addr),
             Sealevel => format!("{:?}", addr),
             Cosmos => format!("{:?}", addr),
+            Aptos => format!("{:?}", addr),
         }
     }
 }
@@ -227,11 +239,11 @@ impl KnownHyperlaneDomain {
             ],
             Testnet: [
                 Alfajores, BinanceSmartChainTestnet, Chiado, ConnextSepolia, Fuji, Holesky, MoonbaseAlpha,
-                PlumeTestnet, ScrollSepolia, Sepolia, SuperpositionTestnet
+                PlumeTestnet, ScrollSepolia, Sepolia, SuperpositionTestnet, AptosTestnet
             ],
             LocalTestChain: [
                 Test1, Test2, Test3, FuelTest1, SealevelTest1, SealevelTest2, CosmosTest99990,
-                CosmosTest99991
+                CosmosTest99991, AptosLocalnet1, AptosLocalnet2
             ],
         })
     }
@@ -261,6 +273,12 @@ impl KnownHyperlaneDomain {
                 // Local chains
                 CosmosTest99990, CosmosTest99991,
             ],
+            HyperlaneDomainProtocol::Aptos: [
+                AptosTestnet,
+
+                // Local chains
+                AptosLocalnet1, AptosLocalnet2
+            ],
         })
     }
 
@@ -281,7 +299,10 @@ impl KnownHyperlaneDomain {
 
                 // Test chains
                 Alfajores, BinanceSmartChainTestnet, Chiado, ConnextSepolia, Holesky, MoonbaseAlpha, ScrollSepolia,
-                Sepolia, SuperpositionTestnet
+                Sepolia, SuperpositionTestnet,
+
+                // Aptos
+                AptosTestnet, AptosLocalnet1, AptosLocalnet2
            ],
         })
     }
@@ -462,7 +483,7 @@ impl HyperlaneDomain {
         use HyperlaneDomainProtocol::*;
         let protocol = self.domain_protocol();
         many_to_one!(match protocol {
-            IndexMode::Block: [Ethereum, Cosmos],
+            IndexMode::Block: [Ethereum, Cosmos, Aptos],
             IndexMode::Sequence : [Sealevel, Fuel],
         })
     }

@@ -159,3 +159,23 @@ impl ChainSigner for hyperlane_cosmos::Signer {
         self.address.clone()
     }
 }
+
+#[async_trait]
+impl BuildableWithSignerConf for hyperlane_aptos::signers::AptosSigner {
+    async fn build(conf: &SignerConf) -> Result<Self, Report> {
+        if let SignerConf::HexKey { key } = conf {
+            let secret = SecretKey::from_bytes(key.as_bytes())
+                .context("Invalid aptos ed25519 secret key")?;
+            use hyperlane_aptos::signers::AptosSigner;
+            Ok(AptosSigner::new(secret)?)
+        } else {
+            bail!(format!("{conf:?} key is not supported by aptos"));
+        }
+    }
+}
+
+impl ChainSigner for hyperlane_aptos::signers::AptosSigner {
+    fn address_string(&self) -> String {
+        self.address.clone()
+    }
+}

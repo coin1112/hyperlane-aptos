@@ -6,6 +6,8 @@ use std::{collections::HashMap, sync::Arc};
 use eyre::{eyre, Context, Result};
 
 use ethers_prometheus::middleware::{ChainInfo, ContractInfo, PrometheusMiddlewareConf};
+use hyperlane_aptos as h_aptos;
+use hyperlane_aptos::AptosHpProvider;
 use hyperlane_core::{
     config::OperationBatchConfig, AggregationIsm, CcipReadIsm, ContractLocator, HyperlaneAbi,
     HyperlaneDomain, HyperlaneDomainProtocol, HyperlaneMessage, HyperlaneProvider, IndexMode,
@@ -28,6 +30,7 @@ use crate::{
 };
 
 use super::ChainSigner;
+use hyperlane_aptos::AptosMailboxIndexer;
 
 /// A trait for converting to a type from a chain configuration with metrics
 #[async_trait]
@@ -113,6 +116,8 @@ pub enum ChainConnectionConf {
     Sealevel(h_sealevel::ConnectionConf),
     /// Cosmos configuration.
     Cosmos(h_cosmos::ConnectionConf),
+    /// Aptos configuration.
+    Aptos(h_aptos::ConnectionConf),
 }
 
 impl ChainConnectionConf {
@@ -123,6 +128,7 @@ impl ChainConnectionConf {
             Self::Fuel(_) => HyperlaneDomainProtocol::Fuel,
             Self::Sealevel(_) => HyperlaneDomainProtocol::Sealevel,
             Self::Cosmos(_) => HyperlaneDomainProtocol::Cosmos,
+            Self::Aptos(_) => HyperlaneDomainProtocol::Aptos,
         }
     }
 
@@ -193,6 +199,10 @@ impl ChainConf {
                 )?;
                 Ok(Box::new(provider) as Box<dyn HyperlaneProvider>)
             }
+            ChainConnectionConf::Aptos(conf) => {
+                let provider = AptosHpProvider::new(locator.domain.clone(), conf.url.to_string());
+                Ok(Box::new(provider) as Box<dyn HyperlaneProvider>)
+            }
         }
         .context(ctx)
     }
@@ -222,6 +232,12 @@ impl ChainConf {
             ChainConnectionConf::Cosmos(conf) => {
                 let signer = self.cosmos_signer().await.context(ctx)?;
                 h_cosmos::CosmosMailbox::new(conf.clone(), locator.clone(), signer.clone())
+                    .map(|m| Box::new(m) as Box<dyn Mailbox>)
+                    .map_err(Into::into)
+            }
+            ChainConnectionConf::Aptos(conf) => {
+                let keypair = self.aptos_signer().await.context(ctx)?;
+                h_aptos::AptosMailbox::new(conf, locator, keypair)
                     .map(|m| Box::new(m) as Box<dyn Mailbox>)
                     .map_err(Into::into)
             }
@@ -257,6 +273,9 @@ impl ChainConf {
 
                 Ok(Box::new(hook) as Box<dyn MerkleTreeHook>)
             }
+            ChainConnectionConf::Aptos(conf) => h_aptos::AptosMailbox::new(conf, locator, None)
+                .map(|m| Box::new(m) as Box<dyn MerkleTreeHook>)
+                .map_err(Into::into),
         }
         .context(ctx)
     }
@@ -294,6 +313,10 @@ impl ChainConf {
                     signer,
                     self.reorg_period,
                 )?);
+                Ok(indexer as Box<dyn SequenceAwareIndexer<HyperlaneMessage>>)
+            }
+            ChainConnectionConf::Aptos(conf) => {
+                let indexer = Box::new(h_aptos::AptosMailboxIndexer::new(conf, locator)?);
                 Ok(indexer as Box<dyn SequenceAwareIndexer<HyperlaneMessage>>)
             }
         }
@@ -335,6 +358,10 @@ impl ChainConf {
                 )?);
                 Ok(indexer as Box<dyn SequenceAwareIndexer<H256>>)
             }
+            ChainConnectionConf::Aptos(conf) => {
+                let indexer = Box::new(h_aptos::AptosMailboxIndexer::new(conf, locator)?);
+                Ok(indexer as Box<dyn SequenceAwareIndexer<H256>>)
+            }
         }
         .context(ctx)
     }
@@ -372,6 +399,10 @@ impl ChainConf {
                     locator.clone(),
                     signer,
                 )?);
+                Ok(paymaster as Box<dyn InterchainGasPaymaster>)
+            }
+            ChainConnectionConf::Aptos(conf) => {
+                let paymaster = Box::new(h_aptos::AptosInterchainGasPaymaster::new(conf, &locator));
                 Ok(paymaster as Box<dyn InterchainGasPaymaster>)
             }
         }
@@ -412,6 +443,12 @@ impl ChainConf {
                     locator,
                     self.reorg_period,
                 )?);
+                Ok(indexer as Box<dyn SequenceAwareIndexer<InterchainGasPayment>>)
+            }
+            ChainConnectionConf::Aptos(conf) => {
+                let indexer = Box::new(h_aptos::AptosInterchainGasPaymasterIndexer::new(
+                    conf, locator,
+                ));
                 Ok(indexer as Box<dyn SequenceAwareIndexer<InterchainGasPayment>>)
             }
         }
@@ -458,6 +495,11 @@ impl ChainConf {
                 )?);
                 Ok(indexer as Box<dyn SequenceAwareIndexer<MerkleTreeInsertion>>)
             }
+            ChainConnectionConf::Aptos(conf) => {
+                let mailbox_indexer = Box::new(AptosMailboxIndexer::new(conf, locator)?);
+                let indexer = Box::new(h_aptos::AptosMerkleTreeHookIndexer::new(*mailbox_indexer));
+                Ok(indexer as Box<dyn SequenceAwareIndexer<MerkleTreeInsertion>>)
+            }
         }
         .context(ctx)
     }
@@ -487,6 +529,11 @@ impl ChainConf {
                     signer,
                 )?);
 
+                Ok(va as Box<dyn ValidatorAnnounce>)
+            }
+            ChainConnectionConf::Aptos(conf) => {
+                let keypair = self.aptos_signer().await.context("Announcing Validator")?;
+                let va = Box::new(h_aptos::AptosValidatorAnnounce::new(conf, locator, keypair));
                 Ok(va as Box<dyn ValidatorAnnounce>)
             }
         }
@@ -528,6 +575,13 @@ impl ChainConf {
                 )?);
                 Ok(ism as Box<dyn InterchainSecurityModule>)
             }
+            ChainConnectionConf::Aptos(conf) => {
+                let keypair = self.aptos_signer().await.context(ctx)?;
+                let ism = Box::new(h_aptos::AptosInterchainSecurityModule::new(
+                    conf, locator, keypair,
+                ));
+                Ok(ism as Box<dyn InterchainSecurityModule>)
+            }
         }
         .context(ctx)
     }
@@ -560,6 +614,11 @@ impl ChainConf {
                     locator.clone(),
                     signer,
                 )?);
+                Ok(ism as Box<dyn MultisigIsm>)
+            }
+            ChainConnectionConf::Aptos(conf) => {
+                let keypair = self.aptos_signer().await.context(ctx)?;
+                let ism = Box::new(h_aptos::AptosMultisigISM::new(conf, locator, keypair));
                 Ok(ism as Box<dyn MultisigIsm>)
             }
         }
@@ -596,6 +655,9 @@ impl ChainConf {
                 )?);
                 Ok(ism as Box<dyn RoutingIsm>)
             }
+            ChainConnectionConf::Aptos(_) => {
+                Err(eyre!("Aptos does not support routing ISM yet")).context(ctx)
+            }
         }
         .context(ctx)
     }
@@ -631,6 +693,9 @@ impl ChainConf {
 
                 Ok(ism as Box<dyn AggregationIsm>)
             }
+            ChainConnectionConf::Aptos(_) => {
+                Err(eyre!("Aptos does not support aggregation ISM yet")).context(ctx)
+            }
         }
         .context(ctx)
     }
@@ -659,6 +724,9 @@ impl ChainConf {
             ChainConnectionConf::Cosmos(_) => {
                 Err(eyre!("Cosmos does not support CCIP read ISM yet")).context(ctx)
             }
+            ChainConnectionConf::Aptos(_) => {
+                Err(eyre!("Aptos does not support CCIP read ISM yet")).context(ctx)
+            }
         }
         .context(ctx)
     }
@@ -683,6 +751,9 @@ impl ChainConf {
                     Box::new(conf.build::<h_sealevel::Keypair>().await?)
                 }
                 ChainConnectionConf::Cosmos(_) => Box::new(conf.build::<h_cosmos::Signer>().await?),
+                ChainConnectionConf::Aptos(_) => {
+                    Box::new(conf.build::<h_aptos::signers::AptosSigner>().await?)
+                }
             };
             Ok(Some(chain_signer))
         } else {
@@ -705,6 +776,10 @@ impl ChainConf {
     }
 
     async fn cosmos_signer(&self) -> Result<Option<h_cosmos::Signer>> {
+        self.signer().await
+    }
+
+    async fn aptos_signer(&self) -> Result<Option<h_aptos::Keypair>> {
         self.signer().await
     }
 
