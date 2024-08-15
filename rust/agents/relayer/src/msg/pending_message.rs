@@ -547,8 +547,12 @@ impl PendingMessage {
     fn inc_attempts(&mut self) {
         self.set_retries(self.num_retries + 1);
         self.last_attempted_at = Instant::now();
-        self.next_attempt_after = PendingMessage::calculate_msg_backoff(self.num_retries)
-            .map(|dur| self.last_attempted_at + dur);
+        let backoff_duration = PendingMessage::calculate_msg_backoff(self.num_retries);
+        debug!(
+            "backoff_duration: {:?}",
+            backoff_duration.map_or("None".to_string(), |d| d.as_secs().to_string())
+        );
+        self.next_attempt_after = backoff_duration.map(|dur| self.last_attempted_at + dur);
     }
 
     fn set_retries(&mut self, retries: u32) {
