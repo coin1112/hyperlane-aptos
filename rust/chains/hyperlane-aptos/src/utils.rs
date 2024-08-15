@@ -21,7 +21,7 @@ use aptos_sdk::{
 use hyperlane_core::{ChainCommunicationError, ChainResult, Indexed, LogMeta, H256, H512, U256};
 use solana_sdk::signature::Keypair;
 use std::{ops::RangeInclusive, str::FromStr};
-use tracing::debug;
+use tracing::info;
 
 /// limit of gas unit
 const GAS_UNIT_LIMIT: u64 = 100000;
@@ -205,7 +205,7 @@ where
     let mut messages: Vec<(Indexed<T>, LogMeta)> =
         Vec::with_capacity((range.end() - range.start()) as usize);
     for filtered_event in filtered_events {
-        debug!("filtered_event: {:?}", filtered_event);
+        info!("filtered_event: {:?}", filtered_event);
         let evt_data: S = filtered_event.clone().try_into()?;
         let block_height = evt_data.block_height().parse().unwrap();
         let block = aptos_client

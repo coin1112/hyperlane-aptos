@@ -1,0 +1,57 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run run-relayer" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <option name="command" value="run --package relayer --bin relayer" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$/rust" />
+    <envs>
+      <env name="HYP_CHAINS_APTOSLOCALNET1_CONNECTION_URLS" value="http://127.0.0.1:8080/v1" />
+      <env name="HYP_CHAINS_APTOSLOCALNET1_RPCCONSENSUSTYPE" value="httpFallback" />
+      <env name="HYP_CHAINS_APTOSLOCALNET1_SIGNER_KEY" value="0x8cb68128b8749613f8df7612e4efd281f8d70f6d195c53a14c27fc75980446c1" />
+      <env name="HYP_CHAINS_APTOSLOCALNET2_CONNECTION_URLS" value="http://127.0.0.1:8080/v1" />
+      <env name="HYP_CHAINS_APTOSLOCALNET2_RPCCONSENSUSTYPE" value="httpFallback" />
+      <env name="HYP_CHAINS_APTOSLOCALNET2_SIGNER_KEY" value="0xf984db645790f569c23821273a95ee3878949e1098c29bcb0ba14101309adeae" />
+      <env name="HYP_ALLOWLOCALCHECKPOINTSYNCERS" value="true" />
+      <env name="HYP_CHAINS_APTOSLOCALNET1_MERKLETREEHOOK" value="0x476307c25c54b76b331a4e3422ae293ada422f5455efed1553cf4de1222a108f" />
+      <env name="HYP_CHAINS_APTOSLOCALNET2_MERKLETREEHOOK" value="0xd338e68ca12527e77cab474ee8ec91ffa4e6512ced9ae8f47e28c5c7c4804b78" />
+      <env name="HYP_CHAINS_TEST1_CHAINID" value="14411" />
+      <env name="HYP_CHAINS_TEST1_INTERCHAINGASPAYMASTER" value="0xc5cb1f1ce6951226e9c46ce8d42eda1ac9774a0fef91e2910939119ef0c95568" />
+      <env name="HYP_CHAINS_TEST1_MAILBOX" value="0x476307c25c54b76b331a4e3422ae293ada422f5455efed1553cf4de1222a108f" />
+      <env name="HYP_CHAINS_TEST1_MERKLETREEHOOK" value="0x476307c25c54b76b331a4e3422ae293ada422f5455efed1553cf4de1222a108f" />
+      <env name="HYP_CHAINS_TEST1_NAME" value="aptoslocalnet1" />
+      <env name="HYP_CHAINS_TEST1_PROTOCOL" value="aptos" />
+      <env name="HYP_CHAINS_TEST1_RPCURLS" value="http://127.0.0.1:8545,http://127.0.0.1:8545" />
+      <env name="HYP_CHAINS_TEST1_VALIDATORANNOUNCE" value="0xa4a4eb4bab83650ba62cabe9ce429ad021b29c12f2fbf808768838255c7e191d" />
+      <env name="HYP_CHAINS_TEST2_CHAINID" value="14411" />
+      <env name="HYP_CHAINS_TEST2_INTERCHAINGASPAYMASTER" value="0xea7d568d0705450331a8f09fd1c823faec91f4ef1c7e6ed4b12c0c53d0c08bc8" />
+      <env name="HYP_CHAINS_TEST2_MAILBOX" value="0xd338e68ca12527e77cab474ee8ec91ffa4e6512ced9ae8f47e28c5c7c4804b78" />
+      <env name="HYP_CHAINS_TEST2_MERKLETREEHOOK" value="0xd338e68ca12527e77cab474ee8ec91ffa4e6512ced9ae8f47e28c5c7c4804b78" />
+      <env name="HYP_CHAINS_TEST2_NAME" value="aptoslocalnet2" />
+      <env name="HYP_CHAINS_TEST2_PROTOCOL" value="aptos" />
+      <env name="HYP_CHAINS_TEST2_RPCURLS" value="http://127.0.0.1:8545,http://127.0.0.1:8545" />
+      <env name="HYP_CHAINS_TEST2_VALIDATORANNOUNCE" value="0xce1f65297828eaa6e460724a869317154f05cdde26619c0e5c0ca23aac3f69c7" />
+      <env name="HYP_CHECKPOINTSYNCER_PATH" value="/tmp/hp/checkpoints0" />
+      <env name="HYP_CHECKPOINTSYNCER_TYPE" value="localStorage" />
+      <env name="HYP_DB" value="/tmp/hp/relayer0" />
+      <env name="HYP_INTERVAL" value="5" />
+      <env name="HYP_LOCAL_BIN" value="$USER_HOME$/.local/bin" />
+      <env name="HYP_LOG_FORMAT" value="compact" />
+      <env name="HYP_LOG_LEVEL" value="trace" />
+      <env name="HYP_METRICSPORT" value="9096" />
+      <env name="HYP_ORIGINCHAINNAME" value="aptoslocalnet1" />
+      <env name="HYP_RELAYCHAINS" value="aptoslocalnet1,aptoslocalnet2" />
+      <env name="HYP_VALIDATOR_KEY" value="0xb25d6937002ecd4d79c7bdfddc0053febc8896f2109e96c45bf69efd84544cd5" />
+      <env name="HYP_RUST_BACKTRACE" value="full" />
+    </envs>
+    <option name="emulateTerminal" value="true" />
+    <option name="channel" value="DEFAULT" />
+    <option name="requiredFeatures" value="true" />
+    <option name="allFeatures" value="false" />
+    <option name="withSudo" value="false" />
+    <option name="buildTarget" value="REMOTE" />
+    <option name="backtrace" value="SHORT" />
+    <option name="isRedirectInput" value="false" />
+    <option name="redirectInputPath" value="" />
+    <method v="2">
+      <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+    </method>
+  </configuration>
+</component>

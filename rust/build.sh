@@ -1,5 +1,3 @@
-#!/bin/bash
-
 TAG=$1
 USE_DEFAULT_PLATFORM=$2
 if [[ -z $TAG ]]; then
