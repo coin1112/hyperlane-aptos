@@ -9,9 +9,3 @@
 - Library Module ( MerkleTree, and some Structures)
 
 Linked Issue: [Issue #1](https://github.com/movemntdev/hyperlane-move-extension/issues/1)
-
-## Run tests
-
-```
-./run-tests.sh
-```

@@ -47,7 +47,7 @@ module hp_igps::igp_tests {
     assert!(expected_token_exchange_rate == token_exchange_rate && expected_gas_price == gas_price, 0);
   }
 
-  // TODO: disable since get_current_block_height() fails
+  // todo: coin1 fix the test
   //#[test(aptos_framework = @0x1, hp_igps=@hp_igps, alice = @0xa11ce, bob = @0xb0b)]
   fun pay_gas_and_beneficiary_test(aptos_framework: signer, hp_igps: signer, alice: signer, bob: signer) {
     test_utils::setup(&aptos_framework, &hp_igps, vector[signer::address_of(&alice), @0xb0b]);

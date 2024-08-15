@@ -9,7 +9,8 @@ module hp_library::ism_metadata {
   //
   const ORIGIN_MAILBOX_OFFSET: u64 = 0;
   const MERKLE_ROOT_OFFSET: u64 = 32;
-  const SIGNATURES_OFFSET: u64 = 64;
+  const MERKLE_INDEX_OFFSET: u64 = 64;
+  const SIGNATURES_OFFSET: u64 = 68;
   const SIGNATURE_LENGTH: u64 = 65;
 
   //
@@ -25,7 +26,12 @@ module hp_library::ism_metadata {
 
   /// Get merkle root from metadata bytes
   public fun merkle_root(metadata_bytes: &vector<u8>): vector<u8> {
-    utils::extract_from_bytes(metadata_bytes, MERKLE_ROOT_OFFSET, SIGNATURES_OFFSET)
+    utils::extract_from_bytes(metadata_bytes, MERKLE_ROOT_OFFSET, MERKLE_INDEX_OFFSET)
+  }
+  
+  /// Get merkle index from metadata bytes
+  public fun merkle_index(metadata_bytes: &vector<u8>): vector<u8> {
+    utils::extract_from_bytes(metadata_bytes, MERKLE_INDEX_OFFSET, SIGNATURES_OFFSET)
   }
 
   /// Get nth signature from metadata_bytes

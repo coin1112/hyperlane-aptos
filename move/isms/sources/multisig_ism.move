@@ -89,6 +89,7 @@ module hp_isms::multisig_ism {
     let origin_domain = msg_utils::origin_domain(message);
 
     let merkle_root = ism_metadata::merkle_root(metadata);
+    let merkle_index = ism_metadata::merkle_index(metadata);
     let signed_digest_bytes = utils::eth_signed_message_hash(&utils::ism_checkpoint_hash(
       origin_mailbox,
       origin_domain,

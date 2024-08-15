@@ -4,14 +4,8 @@ FUNCTION=$1
 #cd ../examples && aptos move compile
 #cd ../validator-announce && aptos move compile
 
-if [ -z "${HYP_BASE_LOCAL_BIN}" ]; then
-  export LOCAL_BIN="$HOME/.local/bin"
-else
-  export LOCAL_BIN="${HYP_BASE_LOCAL_BIN}"
-fi
-
 # To make use of aptos cli
-export PATH="${LOCAL_BIN}:$PATH"
+export PATH="/root/.local/bin:$PATH"
 
 function aptos_init() {
   aptos init --assume-yes --network custom --rest-url "http://0.0.0.0:8080/v1" --faucet-url "http://127.0.0.1:8081" --encoding hex --private-key-file $1
@@ -39,7 +33,6 @@ function fund_and_publish() {
 }
 
 LN1_ADDRESS_MATHING="--named-addresses hp_library=$LN1_LIBRARY_ADDRESS,hp_validator=$LN1_VALIDATOR_ANNOUNCE_ADDRESS,hp_isms=$LN1_ISMS_ADDRESS,hp_igps=$LN1_IGPS_ADDRESS,hp_mailbox=$LN1_MAILBOX_ADDRESS,hp_router=$LN1_ROUTER_ADDRESS,examples=$LN1_EXAMPLES_ADDRESS"
-echo "LN1_ADDRESS_MATHING=$LN1_ADDRESS_MATHING"
 
 function pub_library() {
   fund_and_publish "library" $LN1_LIBRARY_ADDRESS "./e2e/aptos-test-keys/localnet1/library-keypair.json" "$LN1_ADDRESS_MATHING" "./library"
@@ -81,7 +74,7 @@ function test_igps() {
 function test_router() { 
   aptos move test --package-dir ./router $LN1_ADDRESS_MATHING --ignore-compile-warnings
 }
-function test_examples() { 
+function test_exmaples() { 
   aptos move test --package-dir ./examples $LN1_ADDRESS_MATHING --ignore-compile-warnings
 }
 

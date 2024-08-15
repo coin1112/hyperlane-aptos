@@ -68,6 +68,7 @@ module hp_igps::igps {
     event::emit_event<GasPaymentEvent>(
       &mut state.gas_payment_events,
       events::new_gas_payment_event(
+        dest_domain,
         message_id,
         gas_amount,
         required_amount,
