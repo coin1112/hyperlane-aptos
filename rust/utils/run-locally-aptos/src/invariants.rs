@@ -1,18 +1,13 @@
 // use std::path::Path;
 
-use std::path::Path;
-
 use crate::config::Config;
-use crate::metrics::agent_balance_sum;
 use maplit::hashmap;
 
+use crate::fetch_metric;
 use crate::logging::log;
-use crate::solana::solana_termination_invariants_met;
-use crate::{fetch_metric, ZERO_MERKLE_INSERTION_KATHY_MESSAGES};
 
 // This number should be even, so the messages can be split into two equal halves
-// sent before and after the relayer spins up, to avoid rounding errors.
-pub const SOL_MESSAGES_EXPECTED: u32 = 20;
+// sent before and after the relayer spins up, to avoid rounding errors.DEPLOYER_ADDRESS
 pub const APTOS_MESSAGES_EXPECTED: u32 = 20;
 
 const SCRAPER_PORT: &str = "9092";

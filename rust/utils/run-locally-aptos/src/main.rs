@@ -29,9 +29,7 @@ use tempfile::tempdir;
 
 use crate::{
     aptos::*,
-    aptos::*,
     config::Config,
-    ethereum::start_anvil,
     invariants::{termination_invariants_met, APTOS_MESSAGES_EXPECTED},
     metrics::agent_balance_sum,
     solana::*,
