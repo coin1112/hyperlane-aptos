@@ -104,6 +104,7 @@ hyper-tls = "0.5.0"
 hyperlane-cosmwasm-interface = "=0.0.6-rc6"
 injective-protobuf = "0.2.2"
 injective-std = "0.1.5"
+# coin1: downgrade  "itertools 0.10.5" for scraper in Cargo.lock to be able to build it
 itertools = "*"
 jobserver = "=0.1.26"
 jsonrpc-core = "18.0"
@@ -201,13 +202,13 @@ ya-gcp = { version = "0.11.1", features = ["storage"] }
 ## TODO: remove this
 cosmwasm-schema = "1.2.7"
 
-## For Aptos Move
-bcs = { git = "https://github.com/aptos-labs/bcs.git", rev = "d31fab9d81748e2594be5cd5cdf845786a30562d" }
+# coin1: needed for aptos sdk
+bcs = { git = "https://github.com/aptos-labs/bcs.git" }
 
+# coin1: aptos-sdk
 [workspace.dependencies.aptos-sdk]
-git = "https://github.com/movementlabsxyz/aptos-core"
-rev = "cd4e28b4723244ec932099a51061fe49aaa5890f" #hyperlane fix
-## End
+git = "https://github.com/aptos-labs/aptos-core"
+branch = "devnet"
 
 [workspace.dependencies.ethers]
 features = []
@@ -234,18 +235,15 @@ features = ["aws"]
 git = "https://github.com/hyperlane-xyz/ethers-rs"
 tag = "2024-04-25"
 
-# todo: coin1 can we remove this?
+# coin1: need this to resolve conflict between solana and aptos sdk for zeroize
 [patch.crates-io.curve25519-dalek]
 branch = "v3.2.2-relax-zeroize"
 git = "https://github.com/Eclipse-Laboratories-Inc/curve25519-dalek"
 version = "3.2.2"
 
-## todo: coin1 can we simpliofy this?
-## mvmt patch; These changes are for Aptos Move
+## coin1: path to make solana-sdk dalek and aptos-sdk dalek compatible
 [patch.crates-io.ed25519-dalek]
 branch = "main"
-#git = "https://github.com/Eclipse-Laboratories-Inc/ed25519-dalek"
-#version = "1.0.1"
 version = "1.0.1"
 git = "https://github.com/blockchainlover2019/ed25519-dalek"
 
@@ -354,8 +352,7 @@ branch = "trevor/0.32.2-fork"
 git = "https://github.com/hyperlane-xyz/tendermint-rs.git"
 version = "=0.32.2"
 
-# todo: coin1 reevisit this
+# coin1: requested per aptos sdk docs
 [patch.crates-io]
-serde-reflection = { git = "https://github.com/aptos-labs/serde-reflection", rev = "73b6bbf748334b71ff6d7d09d06a29e3062ca075" }
 merlin = { git = "https://github.com/aptos-labs/merlin" }
 x25519-dalek = { git = "https://github.com/aptos-labs/x25519-dalek", branch = "zeroize_v1" }
