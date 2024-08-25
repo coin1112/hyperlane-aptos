@@ -2,7 +2,6 @@
 module hp_library::test_utils {
   use std::vector;
   use std::signer;
-  use std::string::{Self, String};
 
   use aptos_framework::coin::{Self, MintCapability, BurnCapability};
   use aptos_framework::aptos_account; 

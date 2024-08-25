@@ -1,10 +1,5 @@
 #[test_only]
 module hp_router::router_tests {
-  use std::signer;
-  use std::features;
-  use aptos_framework::block;
-  use aptos_framework::account;
-
   use hp_router::router::{Self, RouterCap};
   use hp_library::test_utils;
 

@@ -6,9 +6,6 @@ module hp_router::router {
   use aptos_framework::event::{Self, EventHandle};
   use aptos_std::simple_map::{Self, SimpleMap};
   use aptos_std::type_info::{Self, TypeInfo};
-
-  use hp_library::msg_utils;
-  use hp_library::h256;
   use hp_router::events::{Self, EnrollRemoteRouterEvent};
 
   //

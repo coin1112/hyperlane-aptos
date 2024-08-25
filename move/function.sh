@@ -56,7 +56,7 @@ function pub_examples() {
   fund_and_publish "examples" $LN1_EXAMPLES_ADDRESS "./e2e/aptos-test-keys/localnet1/examples-keypair.json" "$LN1_ADDRESS_MATHING" "./examples"
 }
 
-function test_router() { 
+function test_library() {
   aptos move test --package-dir ./library $LN1_ADDRESS_MATHING --ignore-compile-warnings
 }
 function test_validator() { 
@@ -74,7 +74,7 @@ function test_igps() {
 function test_router() { 
   aptos move test --package-dir ./router $LN1_ADDRESS_MATHING --ignore-compile-warnings
 }
-function test_exmaples() { 
+function test_examples() {
   aptos move test --package-dir ./examples $LN1_ADDRESS_MATHING --ignore-compile-warnings
 }
 
