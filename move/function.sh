@@ -26,13 +26,14 @@ LN1_LIBRARY_ADDRESS="0xe818394d0f37cd6accd369cdd4e723c8dc4f9b8d2517264fec3d9e8ca
 LN1_MAILBOX_ADDRESS="0x476307c25c54b76b331a4e3422ae293ada422f5455efed1553cf4de1222a108f"
 LN1_ROUTER_ADDRESS="0xafce3ab5dc5d513c13e746cef4d65bf54f4abdcb34ea8ab0728d01c035610e3d"
 LN1_VALIDATOR_ANNOUNCE_ADDRESS="0xa4a4eb4bab83650ba62cabe9ce429ad021b29c12f2fbf808768838255c7e191d"
+LN1_TOKEN_ADDRESS="0x584D2CE3984849106F31ACE2D3602780A129EE04FB913FAACA383EFD15C709D6"
 
 function fund_and_publish() {
   aptos account fund-with-faucet --account $2 --url $REST_API_URL --faucet-url $FAUCET_URL
   aptos move publish --url $REST_API_URL --private-key-file $3 --assume-yes $4 --package-dir $5
 }
 
-LN1_ADDRESS_MATHING="--named-addresses hp_library=$LN1_LIBRARY_ADDRESS,hp_validator=$LN1_VALIDATOR_ANNOUNCE_ADDRESS,hp_isms=$LN1_ISMS_ADDRESS,hp_igps=$LN1_IGPS_ADDRESS,hp_mailbox=$LN1_MAILBOX_ADDRESS,hp_router=$LN1_ROUTER_ADDRESS,examples=$LN1_EXAMPLES_ADDRESS"
+LN1_ADDRESS_MATHING="--named-addresses hp_library=$LN1_LIBRARY_ADDRESS,hp_validator=$LN1_VALIDATOR_ANNOUNCE_ADDRESS,hp_isms=$LN1_ISMS_ADDRESS,hp_igps=$LN1_IGPS_ADDRESS,hp_mailbox=$LN1_MAILBOX_ADDRESS,hp_router=$LN1_ROUTER_ADDRESS,hp_token=$LN1_TOKEN_ADDRESS,examples=$LN1_EXAMPLES_ADDRESS"
 
 function pub_library() {
   fund_and_publish "library" $LN1_LIBRARY_ADDRESS "./e2e/aptos-test-keys/localnet1/library-keypair.json" "$LN1_ADDRESS_MATHING" "./library"
@@ -56,6 +57,10 @@ function pub_examples() {
   fund_and_publish "examples" $LN1_EXAMPLES_ADDRESS "./e2e/aptos-test-keys/localnet1/examples-keypair.json" "$LN1_ADDRESS_MATHING" "./examples"
 }
 
+function pub_token() {
+  fund_and_publish "token" $LN1_TOKEN_ADDRESS "./e2e/aptos-test-keys/localnet1/token-keypair.json" "$LN1_ADDRESS_MATHING" "./token"
+}
+
 function test_library() {
   aptos move test --package-dir ./library $LN1_ADDRESS_MATHING --ignore-compile-warnings
 }
@@ -76,6 +81,10 @@ function test_router() {
 }
 function test_examples() {
   aptos move test --package-dir ./examples $LN1_ADDRESS_MATHING --ignore-compile-warnings
+}
+
+function test_token() {
+  aptos move test --package-dir ./token $LN1_ADDRESS_MATHING --ignore-compile-warnings
 }
 
 function fund() {
