@@ -68,6 +68,7 @@ fi
 rm -rf "$HYP_DB" || true
 mkdir -p "$HYP_DB"
 
+pushd ../rust
 target/debug/relayer
 
 

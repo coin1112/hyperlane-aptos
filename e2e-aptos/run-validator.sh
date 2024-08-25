@@ -60,6 +60,7 @@ rm -rf "$HYP_CHECKPOINTSYNCER_PATH" || true
 mkdir -p "HYP_DB"
 mkdir -p "$HYP_CHECKPOINTSYNCER_PATH"
 
+pushd ../rust
 target/debug/validator
 
 
