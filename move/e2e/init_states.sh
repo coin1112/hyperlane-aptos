@@ -114,7 +114,7 @@ function remote_transfer_native_ln1_to_ln2() {
 
   cd "$(pwd)"
 
-  cd ../token && aptos move run --function-id $LN1_NATIVE_TOKEN_ADDRESS::hp_token::remote_transfer --args u32:$APTOSLOCALNET2_DOMAIN string:"Sending native tokens" --url $REST_API_URL --private-key-file "../e2e/aptos-test-keys/localnet1/token-keypair.json" --assume-yes
+  cd ../token && aptos move run --function-id $LN1_TOKEN_ADDRESS::native_token::remote_transfer --args u32:$APTOSLOCALNET2_DOMAIN string:"Sending native tokens" --url $REST_API_URL --private-key-file "../e2e/aptos-test-keys/localnet1/token-keypair.json" --assume-yes
 }
 function remote_transfer_native_ln2_to_ln1() {
 
@@ -122,7 +122,7 @@ function remote_transfer_native_ln2_to_ln1() {
 
   cd "$(pwd)"
 
-  cd ../token && aptos move run --function-id $LN2_NATIVE_TOKEN_ADDRESS::hp_token::remote_transfer --args u32:$APTOSLOCALNET1_DOMAIN string:"Sending native tokens" --url $REST_API_URL --private-key-file "../e2e/aptos-test-keys/localnet2/token-keypair.json" --assume-yes
+  cd ../token && aptos move run --function-id $LN2_TOKEN_ADDRESS::native_token::remote_transfer --args u32:$APTOSLOCALNET1_DOMAIN string:"Sending native tokens" --url $REST_API_URL --private-key-file "../e2e/aptos-test-keys/localnet2/token-keypair.json" --assume-yes
 }
 
 #`address:0x1 bool:true u8:0 u256:1234 "bool:[true, false]" 'address:[["0xace", "0xbee"], []]'`

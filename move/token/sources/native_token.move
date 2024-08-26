@@ -45,7 +45,7 @@ module hp_token::native_token {
 
 
     /// Process synthetic tokens transferred from other chains to aptos
-    public entry fun handle(
+    public entry fun handle_message(
         message: vector<u8>,
         metadata: vector<u8>
     ) acquires State {
