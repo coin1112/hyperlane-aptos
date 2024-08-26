@@ -31,18 +31,27 @@ module hp_router::router {
   //
 
   struct RouterRegistry has key {
+    // map (package_addy => module_name)
     package_map: SimpleMap<address, vector<u8>>,
+    // map (package_addy::module_name => RouterState)
     router_state_map: SimpleMap<TypeInfo, RouterState>,
     local_domain: u32,
   }
 
   struct RouterState has store {
     owner_address: address,
+    // map (domain => vec<remote_router>)
+    // remote router address is address of target token contract
     routers: SimpleMap<u32, vector<u8>>,
     // event handle
     enroll_router_events: EventHandle<EnrollRemoteRouterEvent>
   }
 
+  // Router capability
+  // used as a type constrain with a remote router
+  // since a remote router is only identified by its address, move
+  // allows to associate token type with this address,
+  // see mailbox::dispatch on how this capability is used
   struct RouterCap<phantom T> has store {}
 
   fun init_module(account: &signer) {

@@ -1,12 +1,10 @@
 module hp_library::token_msg_utils {
-    // use std::vector;
     use std::string::{Self, String};
     use std::bcs;
     use std::vector;
 
     use aptos_std::from_bcs;
     use aptos_std::aptos_hash;
-    use std::debug;
 
     use hp_library::utils::{ extract_from_bytes, extract_from_bytes_reversed };
 
@@ -106,6 +104,7 @@ module hp_library::token_msg_utils {
 
     #[test]
     fun token_msg_roundtrip_test() {
+        use std::debug;
         // encode message
         let recipient_vec: vector<u8> = x"d1eaef049ac77e63f2ffefae43e14c1a73700f25cde849b6614dc3f358012335";
         let metadata_vec: vector<u8> = x"d1eaef049ac77e63f2ffefae43e14c1a73700f25cde849b6614dc3f358";
