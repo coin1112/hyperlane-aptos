@@ -51,13 +51,13 @@ function init_ln1_modules() {
   L1_ROUTER_CAP="$LN1_EXAMPLES_ADDRESS::hello_world::HelloWorld"
 
   # setting token router
-  L1_NATIVE_ROUTER_CAP="$LN1_TOKEN_ADDRESS::hp_token::NativeToken"
+  L1_NATIVE_ROUTER_CAP="$LN1_TOKEN_ADDRESS::native_token::NativeToken"
 
   # enroll ln2 router
   cd ../router && aptos move run --assume-yes --function-id $LN1_ROUTER_ADDRESS::router::enroll_remote_router --type-args $L1_ROUTER_CAP --args u32:$APTOSLOCALNET2_DOMAIN "u8:[178,88,111,141,19,71,185,136,21,123,158,122,174,162,77,25,6,77,251,89,104,53,20,93,177,249,63,249,49,148,135,50]" --url $REST_API_URL --private-key-file "../e2e/aptos-test-keys/localnet1/examples-keypair.json"
 
   # enroll ln2 router for native token
-  cd ../router && aptos move run --assume-yes --function-id $LN1_ROUTER_ADDRESS::router::enroll_remote_router --type-args L1_NATIVE_ROUTER_CAP --args u32:$APTOSLOCALNET2_DOMAIN "u8:[29,208,107,9,161,18,2,174,30,103,110,235,160,129,81,235,172,43,34,137,41,4,199,49,177,203,191,188,194,131,236,217]" --url $REST_API_URL --private-key-file "../e2e/aptos-test-keys/localnet1/token-keypair.json"
+  cd ../router && aptos move run --assume-yes --function-id $LN1_ROUTER_ADDRESS::router::enroll_remote_router --type-args $L1_NATIVE_ROUTER_CAP --args u32:$APTOSLOCALNET2_DOMAIN "u8:[29,208,107,9,161,18,2,174,30,103,110,235,160,129,81,235,172,43,34,137,41,4,199,49,177,203,191,188,194,131,236,217]" --url $REST_API_URL --private-key-file "../e2e/aptos-test-keys/localnet1/token-keypair.json"
 
   cd ../mailbox && aptos move run --assume-yes --function-id $LN1_MAILBOX_ADDRESS::mailbox::initialize --args u32:$APTOSLOCALNET1_DOMAIN --url $REST_API_URL --private-key-file "../e2e/aptos-test-keys/localnet1/mailbox-keypair.json"
   
@@ -77,7 +77,7 @@ function init_ln2_modules() {
   L2_ROUTER_CAP="$LN2_EXAMPLES_ADDRESS::hello_world::HelloWorld"
 
   # setting native token router
-  L2_NATIVE_ROUTER_CAP="$LN2_TOKEN_ADDRESS::hp_token::NativeToken"
+  L2_NATIVE_ROUTER_CAP="$LN2_TOKEN_ADDRESS::native_token::NativeToken"
 
   # enroll ln1 router
   cd ../router && aptos move run --assume-yes --function-id $LN2_ROUTER_ADDRESS::router::enroll_remote_router --type-args $L2_ROUTER_CAP --args u32:$APTOSLOCALNET1_DOMAIN "u8:[209,234,239,4,154,199,126,99,242,255,239,174,67,225,76,26,115,112,15,37,205,232,73,182,97,77,195,243,88,1,35,252]" --url $REST_API_URL --private-key-file "../e2e/aptos-test-keys/localnet2/examples-keypair.json"
