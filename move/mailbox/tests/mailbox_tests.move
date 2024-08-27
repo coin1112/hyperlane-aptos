@@ -22,14 +22,13 @@ module hp_mailbox::mailbox_tests {
     router_cap: RouterCap<T>
   }
 
-  // todo: coin1 fix the test
-  //#[test(aptos_framework=@0x1, hp_router=@hp_router, hp_mailbox=@hp_mailbox, hp_igps=@hp_igps, alice=@0xa11ce)]
+  #[test(aptos_framework=@0x1, hp_router=@hp_router, hp_mailbox=@hp_mailbox, hp_igps=@hp_igps, alice=@0xa11ce)]
   fun dispatch_test(aptos_framework: signer, hp_router: signer, hp_mailbox: signer, hp_igps: signer, alice: signer) acquires RouterCapWrapper {
     test_utils::setup(&aptos_framework, &hp_mailbox, vector[@hp_mailbox, @hp_igps, @0xa11ce]);
     
     // enable auid feature because mailbox needs to call `get_transaction_hash()`
     let feature = features::get_auids();
-    features::change_feature_flags(&aptos_framework, vector[feature], vector[]);
+    features::change_feature_flags_for_next_epoch(&aptos_framework, vector[feature], vector[]);
 
     // block must be initilized because mailbox access block resource
     account::create_account_for_test(@aptos_framework);
