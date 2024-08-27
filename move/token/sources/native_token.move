@@ -60,4 +60,9 @@ module hp_token::native_token {
         // TODO: coin1: add logic to mint native token on aptos
         vector::push_back(&mut state.received_messages, token_msg_utils::metadata(&message));
     }
+
+    #[test_only]
+    public fun init_for_test(account: &signer) {
+        init_module(account);
+    }
 }
