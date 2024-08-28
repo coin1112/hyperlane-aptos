@@ -7,6 +7,7 @@ module hp_mailbox::mailbox {
   use aptos_framework::transaction_context;
   use aptos_framework::event::{Self, EventHandle};
   use aptos_std::simple_map::{Self, SimpleMap};
+  use std::debug;
 
   use hp_mailbox::events::{Self, ProcessEvent, DispatchEvent};
   use hp_library::msg_utils;
@@ -130,6 +131,10 @@ module hp_mailbox::mailbox {
   ) acquires MailBoxState {
     let src_domain = msg_utils::origin_domain(&message);
     let sender_addr = msg_utils::sender(&message);
+    debug::print<std::string::String>(&std::string::utf8(b"-----src_domain------------"));
+    debug::print(&src_domain);
+    debug::print<std::string::String>(&std::string::utf8(b"-----sender_addr------------"));
+    debug::print(&sender_addr);
     router::assert_router_should_be_enrolled<T>(src_domain, sender_addr);
     inbox_process(
       message,

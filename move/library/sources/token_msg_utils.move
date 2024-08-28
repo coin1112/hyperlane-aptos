@@ -44,6 +44,7 @@ module hp_library::token_msg_utils {
         vector::append(&mut result, recipient);
         vector::append(&mut result, amount_bytes);
         vector::append(&mut result, metadata);
+
         result
     }
 

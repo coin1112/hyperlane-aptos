@@ -2,6 +2,7 @@ module hp_router::router {
   
   use std::vector;
   use std::signer;
+  use std::debug;
   use aptos_framework::account;
   use aptos_framework::event::{Self, EventHandle};
   use aptos_std::simple_map::{Self, SimpleMap};
@@ -145,6 +146,10 @@ module hp_router::router {
     domain: u32,
     remote_router: vector<u8>
   ) {
+    debug::print<std::string::String>(&std::string::utf8(b"-----domain------------"));
+    debug::print(&domain);
+    debug::print<std::string::String>(&std::string::utf8(b"-----remote_router------------"));
+    debug::print(&remote_router);
     if (!simple_map::contains_key(&state.routers, &domain)) {
       simple_map::add(&mut state.routers, domain, remote_router);
     } else {

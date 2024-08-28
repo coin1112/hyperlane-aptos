@@ -46,4 +46,21 @@ module hp_library::ism_metadata {
         // get signature
         utils::extract_from_bytes(metadata_bytes, start, end)
     }
+
+    // Formats signature message for single signature at inbdex 0
+    #[test_only]
+    public fun format_signature_into_bytes(
+        origin_mailbox: address,
+        merkle_root: vector<u8>,
+        merkle_index : u32,
+        signature_at_0: vector<u8>,
+    ): vector<u8> {
+        use std::bcs;
+        let result = vector::empty<u8>();
+        vector::append(&mut result, bcs::to_bytes<address>(&origin_mailbox));
+        vector::append(&mut result, merkle_root);
+        vector::append(&mut result, bcs::to_bytes<u32>(&merkle_index));
+        vector::append(&mut result, signature_at_0);
+        result
+    }
 }

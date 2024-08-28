@@ -1,6 +1,7 @@
 module hp_isms::multisig_ism {
   use std::signer;
   use std::vector;
+  use std::debug;
   use std::option;
   use aptos_std::simple_map::{Self, SimpleMap};
 
@@ -98,6 +99,18 @@ module hp_isms::multisig_ism {
       msg_utils::id(message)
     ));
 
+    debug::print<std::string::String>(&std::string::utf8(b"-----signed_digest_bytes------------"));
+    debug::print(&signed_digest_bytes);
+
+    debug::print<std::string::String>(&std::string::utf8(b"-----origin_mailbox------------"));
+    debug::print(&origin_mailbox);
+
+    debug::print<std::string::String>(&std::string::utf8(b"-----domain------------"));
+    debug::print(&origin_domain);
+
+    debug::print<std::string::String>(&std::string::utf8(b"-----merkle_root------------"));
+    debug::print(&merkle_root);
+
     
     let domain_validators = simple_map::borrow(&state.validators_per_domain, &origin_domain);
     let validator_count = vector::length(&domain_validators.validators);
@@ -108,16 +121,24 @@ module hp_isms::multisig_ism {
     // Assumes that signatures are ordered by validator
     while ( i < domain_validators.threshold ) {
       let validator_signature = ism_metadata::signature_at(metadata, i);
+      debug::print<std::string::String>(&std::string::utf8(b"-----validator_signature------------"));
+      debug::print(&validator_signature);
       let signer_address = utils::secp256k1_recover_ethereum_address(
         &signed_digest_bytes,
         &validator_signature
       );
+
+      debug::print<std::string::String>(&std::string::utf8(b"-----signer_address------------"));
+      debug::print(&signer_address);
 
       // address recover failed
       if (option::is_none(&signer_address)) {
         verify_result = false;
         break
       };
+
+      debug::print<std::string::String>(&std::string::utf8(b"-----validator------------"));
+      debug::print(vector::borrow(&domain_validators.validators, 0));
 
       while (validator_index < validator_count && 
         !utils::compare_bytes_and_address(
