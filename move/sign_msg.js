@@ -9,8 +9,7 @@ async function main() {
 
   // Define the message to be signed
   const message =
-    '0x000000000000003842f5ee93f71eac3125478f7877dcc3172bef0daa4669001a3b9a05d530ac74a4af00003842f5ee93f71eac3125478f7877dcc3172bef0daa4669001a3b9a05d530ac74a4af00000000';
-
+    '0x9c56d415bcd9cb091a96b577667a8b15292f80561584a5af9d63f033593bcd63';
   // Convert the message to a byte array
   const messageBytes = ethers.utils.arrayify(message);
 

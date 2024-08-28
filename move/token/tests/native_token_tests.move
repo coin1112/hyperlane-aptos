@@ -24,10 +24,18 @@ module hp_token::native_tests {
     const APTOS_TESTNET_DOMAIN: u32 = 14402;
     const BSC_TESTNET_DOMAIN: u32 = 14402; // use destination chain the same as origin
 
-    #[test(aptos_framework=@0x1, hp_router=@hp_router, hp_mailbox=@hp_mailbox, hp_igps=@hp_igps, hp_isms=@hp_isms, hp_token=@hp_token, alice=@0xa11ce)]
+    #[test(
+        aptos_framework= @0x1,
+        hp_router= @hp_router,
+        hp_mailbox= @hp_mailbox,
+        hp_igps= @hp_igps,
+        hp_isms= @hp_isms,
+        hp_token= @hp_token,
+        alice= @0xa11ce
+    )]
     fun dispatch_test(aptos_framework: signer, hp_router: signer,
                       hp_mailbox: signer, hp_igps: signer, hp_isms: signer,
-                      hp_token: signer, alice: signer)  {
+                      hp_token: signer, alice: signer) {
         test_utils::setup(&aptos_framework, &hp_token, vector[@hp_mailbox, @hp_token, @hp_igps, @hp_isms, @0xa11ce]);
 
         // enable auid feature because mailbox needs to call `get_transaction_hash()`
@@ -50,8 +58,6 @@ module hp_token::native_tests {
 
         // enroll fake remote router which handles native token transfer on the other chain
         let bsc_testnet_router = bcs::to_bytes(&signer::address_of(&hp_token));
-        debug::print<std::string::String>(&std::string::utf8(b"-----bsc_testnet_router------------"));
-        debug::print(&bsc_testnet_router);
         router::enroll_remote_router<NativeToken>(&hp_token, BSC_TESTNET_DOMAIN, bsc_testnet_router);
 
         // check routers and domains
@@ -71,80 +77,54 @@ module hp_token::native_tests {
 
         // retrieve checkpoint
         let (root, count) = mailbox::outbox_latest_checkpoint();
-        debug::print<std::string::String>(&std::string::utf8(b"-----merle tree root------------"));
-        debug::print(&root);
-        debug::print<std::string::String>(&std::string::utf8(b"-----merle tree count------------"));
-        debug::print(&count);
 
-        // get message id
-        let message_bytes = msg_utils::format_message_into_bytes(
-            utils::get_version(), // version
-            count-1,   // nonce
-            APTOS_TESTNET_DOMAIN,   // domain
-            signer::address_of(&hp_token),          // sender address
-            BSC_TESTNET_DOMAIN,   // destination domain
-            bsc_testnet_router,            // recipient
-            message_body
-        );
-        let message_id = msg_utils::id(&message_bytes);
+        let (message_bytes, digest_bytes_to_sign) = msg_utils::format_message_and_digest(root,
+            count - 1,
+            APTOS_TESTNET_DOMAIN,
+            signer::address_of(&hp_token),
+            signer::address_of(&hp_mailbox),
+            BSC_TESTNET_DOMAIN,
+            bsc_testnet_router,
+            message_body);
 
-        debug::print<std::string::String>(&std::string::utf8(b"-----message_bytes------------"));
-        debug::print(&message_bytes);
+        assert(&digest_bytes_to_sign == &x"9c56d415bcd9cb091a96b577667a8b15292f80561584a5af9d63f033593bcd63", 0);
+
+        // A test signature from this Ethereum address:
+        //   Address: 0xae58d95bfd2ea752280279f73a1ba40de7336349
+        //   Private Key: 0xe1434ec74549ce4c3d6eded91a0656f864b0982fdb196ef511921efc25dfc499
+        //   Public Key: 0x6bbae7820a27ff21f28ba5a4b64c8b746cdd95e2b3264a686dd15651ef90a2a1
+        // The signature was generated using ethers-js:
+        //   wallet = new ethers.Wallet('0xe1434ec74549ce4c3d6eded91a0656f864b0982fdb196ef511921efc25dfc499')
+        //   await wallet.signMessage(ethers.utils.arrayify('0x9c56d415bcd9cb091a96b577667a8b15292f80561584a5af9d63f033593bcd63'))
 
         // use 'node sign_msg.js' to sign a message in message_bytes
-        let message_signature = x"7b7e6675f0aeae7732e03cb19a675454b2a195f071df8327408c80a87ae2b8c23c23ad8e88207e053d54e55dc2d56d7ed72f93a8cf72b271788b7ab1c29e803a1b";
-
-        debug::print<std::string::String>(&std::string::utf8(b"-----message_signature------------"));
-        debug::print(&message_signature);
-
-        // let signer_address = utils::secp256k1_recover_ethereum_address(
-        //     &signed_digest_bytes,
-        //     &validator_signature
-        // );
-        //
-        // debug::print<std::string::String>(&std::string::utf8(b"-----signer_address_test------------"));
-        // debug::print(&signer_address);
-
-        // let address = derive_address_from_public_key(option::borrow(&signer_address));
-        // std::debug::print<std::string::String>(&std::string::utf8(b"-----print_account_address_test------------"));
-        // std::debug::print(&address);
-
+        let digest_bytes_signature = x"085386535540a4356437672fda5e5260f7d85ae1aa80b08a5e4d315738317e5669d9b94379dcf9e2766bbc1aba4ee5f59a90b300fb59971f4d8b0739bbfa0c371c";
 
         let metadata_bytes = ism_metadata::format_signature_into_bytes(
             signer::address_of(&hp_mailbox),
             root,
-            count-1,
-            message_signature
+            count - 1,
+            digest_bytes_signature
         );
 
-        // generate digest
-        let signed_digest_bytes = utils::eth_signed_message_hash(&utils::ism_checkpoint_hash(
-            signer::address_of(&hp_mailbox),
-            APTOS_TESTNET_DOMAIN,
-            root,
-            count-1,
-            message_id
-        ));
+        // derive validator ethereum address
+        let eth_address_opt = utils::secp256k1_recover_ethereum_address(&digest_bytes_to_sign, &digest_bytes_signature);
+        assert(option::is_some(&eth_address_opt), 0);
+        let eth_address_bytes = option::borrow(&eth_address_opt);
+        let isms1_eth_address = @0xae58d95bfd2ea752280279f73a1ba40de7336349;
 
-        debug::print<std::string::String>(&std::string::utf8(b"-----signed_digest_bytes_test------------"));
-        debug::print(&signed_digest_bytes);
-
-        debug::print<std::string::String>(&std::string::utf8(b"-----mailbox_addr_test------------"));
-        debug::print(&signer::address_of(&hp_mailbox));
-
-        debug::print<std::string::String>(&std::string::utf8(b"-----domain_test------------"));
-        debug::print(&APTOS_TESTNET_DOMAIN);
-
-        debug::print<std::string::String>(&std::string::utf8(b"-----root_test------------"));
-        debug::print(&root);
-
+        // make sure it matches expected address for LN1_ISMS_ADDRESS
+        assert(utils::compare_bytes_and_address(
+            eth_address_bytes,
+            &isms1_eth_address
+        ), 0);
 
         // init ism
         multisig_ism::init_for_test(&hp_isms);
         multisig_ism::set_validators_and_threshold(
             &hp_isms,
-            vector[signer::address_of(&hp_isms)],
-            1,   // threshold
+            vector[isms1_eth_address],
+            1, // threshold
             BSC_TESTNET_DOMAIN   // origin_domain
         );
 
