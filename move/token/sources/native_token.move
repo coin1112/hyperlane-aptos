@@ -5,6 +5,7 @@ module hp_token::native_token {
     use hp_router::router;
     use hp_library::token_msg_utils;
     use hp_mailbox::mailbox;
+    use hp_library::msg_utils;
 
     const DEFAULT_GAS_AMOUNT: u256 = 1_000_000_000;
 
@@ -32,17 +33,19 @@ module hp_token::native_token {
     }
 
     // Send aptos native token to a synthetic equvalent on the other chain
-    public entry fun remote_transfer(
+    public entry fun transfer_remote(
         account: &signer,
         dest_domain: u32,
-        message: vector<u8>
+        amount: u64
     ) acquires State {
         let state = borrow_global<State>(@hp_token);
+
+        let message_body = msg_utils::format_transfer_remote_msg_to_bytes(amount);
 
         mailbox::dispatch_with_gas<NativeToken>(
             account,
             dest_domain,
-            message,
+            message_body,
             DEFAULT_GAS_AMOUNT,
             &state.cap
         );

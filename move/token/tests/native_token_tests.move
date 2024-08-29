@@ -41,8 +41,8 @@ module hp_token::native_tests {
         alice= @0xa11ce
     )]
     fun dispatch_handle_test(aptos_framework: signer, hp_router: signer,
-                      hp_mailbox: signer, hp_igps: signer, hp_isms: signer,
-                      hp_token: signer, alice: signer) {
+                             hp_mailbox: signer, hp_igps: signer, hp_isms: signer,
+                             hp_token: signer, alice: signer) {
         test_utils::setup(&aptos_framework, &hp_token, vector[@hp_mailbox, @hp_token, @hp_igps, @hp_isms, @0xa11ce]);
 
         // enable auid feature because mailbox needs to call `get_transaction_hash()`
@@ -84,8 +84,8 @@ module hp_token::native_tests {
         igp_tests::init_igps_for_test(&hp_igps);
 
         // send tokens
-        let message_body = vector[0, 0, 0, 0];
-        native_token::remote_transfer(&hp_token, BSC_TESTNET_DOMAIN, message_body);
+        let amount: u64 = 10;
+        native_token::transfer_remote(&alice, BSC_TESTNET_DOMAIN, amount);
 
         // check message is in mailbox
         assert!(mailbox::outbox_get_count() == 1, 0);
@@ -94,6 +94,7 @@ module hp_token::native_tests {
         let (root, count) = mailbox::outbox_latest_checkpoint();
 
         // format message and its digest to sign just like a validator would do
+        let message_body = msg_utils::format_transfer_remote_msg_to_bytes(amount);
         let (message_bytes, digest_bytes_to_sign) = msg_utils::format_message_and_digest(root,
             count - 1,
             APTOS_TESTNET_DOMAIN,
@@ -103,9 +104,12 @@ module hp_token::native_tests {
             bsc_testnet_router,
             message_body);
 
+        std::debug::print<std::string::String>(&std::string::utf8(b"-----digest_bytes_to_sign------------"));
+        std::debug::print(&digest_bytes_to_sign);
+
         // if this fails you would need to use sign_msg.js to get a new digest_bytes_signature below
         // it is not possible to sign inside move
-        assert(&digest_bytes_to_sign == &x"9c56d415bcd9cb091a96b577667a8b15292f80561584a5af9d63f033593bcd63", 0);
+        assert!(&digest_bytes_to_sign == &x"367c815be770c0b6de0249ce32c68512365ffcda8f586726527df3e7169e406d", 0);
 
         // A test signature from this Ethereum address:
         //   Address: 0xae58d95bfd2ea752280279f73a1ba40de7336349
@@ -113,10 +117,10 @@ module hp_token::native_tests {
         //   Public Key: 0x6bbae7820a27ff21f28ba5a4b64c8b746cdd95e2b3264a686dd15651ef90a2a1
         // The signature was generated using ethers-js:
         //   wallet = new ethers.Wallet('0xe1434ec74549ce4c3d6eded91a0656f864b0982fdb196ef511921efc25dfc499')
-        //   await wallet.signMessage(ethers.utils.arrayify('0x9c56d415bcd9cb091a96b577667a8b15292f80561584a5af9d63f033593bcd63'))
+        //   await wallet.signMessage(ethers.utils.arrayify('0x367c815be770c0b6de0249ce32c68512365ffcda8f586726527df3e7169e406d'))
 
         // use 'node sign_msg.js' to sign a message in message_bytes if digest_bytes_to_sign changes
-        let digest_bytes_signature = x"085386535540a4356437672fda5e5260f7d85ae1aa80b08a5e4d315738317e5669d9b94379dcf9e2766bbc1aba4ee5f59a90b300fb59971f4d8b0739bbfa0c371c";
+        let digest_bytes_signature = x"e1a9fc3bb217af017d85c5877003b45afd5a24f06ec37657b3648f36512ebac264864d075699d2f9d0c136975f2c5253deaaefb46c05f80d1370366b0afc89fa1b";
 
         // package signature and othjer attributes into checkpoint metadata just like a validator
         let metadata_bytes = ism_metadata::format_signature_into_bytes(
@@ -132,12 +136,15 @@ module hp_token::native_tests {
         // If a signer address changes, replace isms1_eth_address with a new value produced by
         // secp256k1_recover_ethereum_address()
         let eth_address_opt = utils::secp256k1_recover_ethereum_address(&digest_bytes_to_sign, &digest_bytes_signature);
-        assert(option::is_some(&eth_address_opt), 0);
+        assert!(option::is_some(&eth_address_opt), 0);
         let eth_address_bytes = option::borrow(&eth_address_opt);
-        let isms1_eth_address = @0xae58d95bfd2ea752280279f73a1ba40de7336349;
+        let isms1_eth_address = @0x9dc0a7b8848c70c742837d12486adba7a21466e2;
+
+        std::debug::print<std::string::String>(&std::string::utf8(b"-----eth_address_bytes------------"));
+        std::debug::print(eth_address_bytes);
 
         // make sure it matches expected address for LN1_ISMS_ADDRESS
-        assert(utils::compare_bytes_and_address(
+        assert!(utils::compare_bytes_and_address(
             eth_address_bytes,
             &isms1_eth_address
         ), 0);

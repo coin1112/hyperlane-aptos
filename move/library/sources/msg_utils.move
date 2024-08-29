@@ -88,6 +88,17 @@ module hp_library::msg_utils {
         string::utf8(module_name_bytes)
     }
 
+    // Serialize transfer_remote() data into byte arry to send to the other chain
+    public fun format_transfer_remote_msg_to_bytes(
+        amount: u64,
+    ): vector<u8> {
+        let result = vector::empty<u8>();
+        // use little endian format since EVM uses it
+        let amount_bytes = bcs::to_bytes<u64>(&amount);
+        vector::append(&mut result, amount_bytes);
+        result
+    }
+
     #[test_only]
     public fun format_message_and_digest(
         root: vector<u8>,
