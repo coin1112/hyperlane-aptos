@@ -67,7 +67,7 @@ module hp_igps::gas_oracle_tests {
     assert!(expected_token_exchange_rate == token_exchange_rate && expected_gas_price == mainnet_gas_price, 0);
   }
 
-  /// Test will fail because non-admin tries setting gas data
+  // Test will fail because non-admin tries setting gas data
   #[test(aptos_framework = @0x1, hp_igps=@hp_igps, alice = @0xa11ce)]
   #[expected_failure(abort_code = 1)]
   fun non_admin_tries_setting_gas_data(aptos_framework: signer, hp_igps: signer, alice: signer) {

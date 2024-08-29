@@ -6,7 +6,6 @@ module hp_token::native_token {
     use aptos_framework::coin::Self;
     use aptos_framework::event::{Self, EventHandle};
     use hp_library::msg_utils;
-    use hp_library::token_msg_utils;
     use hp_mailbox::mailbox;
     use hp_router::router;
     use hp_token::events::{Self, SentTransferRemote};
@@ -103,7 +102,7 @@ module hp_token::native_token {
         );
 
         // TODO: coin1: add logic to mint native token on aptos
-        vector::push_back(&mut state.received_messages, token_msg_utils::metadata(&message));
+        vector::push_back(&mut state.received_messages, msg_utils::body(&message));
     }
 
     #[test_only]

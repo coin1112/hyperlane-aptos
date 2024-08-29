@@ -8,7 +8,6 @@ module hp_mailbox::mailbox_tests {
   use aptos_framework::account;
 
   use hp_mailbox::mailbox;
-  use hp_igps::igp_tests;
   use hp_library::test_utils;
   use hp_router::router::{Self, RouterCap};
 
@@ -61,7 +60,7 @@ module hp_mailbox::mailbox_tests {
     // check if mailbox count increased
     assert!(mailbox::outbox_get_count() == 1, 0);
     // init igp first
-    igp_tests::init_igps_for_test(&hp_igps);
+    hp_igps::test_utils::init_igps_for_test(&hp_igps);
     // try dispatching with gas
     mailbox::dispatch_with_gas<TestRouter>(&alice, BSC_TESTNET_DOMAIN, message_body, 10000, &cap_wrapper.router_cap);
     // check if mailbox count increased

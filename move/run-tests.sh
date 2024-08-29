@@ -5,3 +5,5 @@
 ./function.sh test_igps
 ./function.sh test_router
 ./function.sh test_examples
+./function.sh test_token
+./function.sh test_library

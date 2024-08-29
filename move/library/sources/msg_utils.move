@@ -9,7 +9,7 @@ module hp_library::msg_utils {
     use hp_library::utils::{ extract_from_bytes, extract_from_bytes_reversed,
         ism_checkpoint_hash, get_version};
 
-    /// Convert message data into bytes
+    /// Convert message ata into bytes
     public fun format_message_into_bytes(
         version: u8,
         nonce: u32,

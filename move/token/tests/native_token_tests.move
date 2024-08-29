@@ -5,7 +5,7 @@ module hp_token::native_tests {
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::block;
     use aptos_framework::coin::Self;
-    use hp_igps::igp_tests;
+    use hp_igps::test_utils::set_igps_for_test;
     use hp_isms::multisig_ism;
     use hp_library::account_utils::derive_address_from_public_key;
     use hp_library::h256::{Self, H256};
@@ -89,25 +89,13 @@ module hp_token::native_tests {
         assert!(router::get_domains<NativeToken>() == vector[DESTINATION_DOMAIN], 0);
 
         // init gas paymaster for gas transfers first
-        igp_tests::init_igps_for_test(&hp_igps);
-
-        // set up gas oracle
         // set exchange rate: 1 x 1
-        let token_exchange_rate = 10_000_000_000;
-        // network gas price
-        let gas_price = 10;
+        let token_exchange_rate: u128 = 10_000_000_000;
+        let gas_price: u128 = 10;
 
-        // set gas data
-        hp_igps::gas_oracle::set_remote_gas_data(
-            &hp_igps,
-            DESTINATION_DOMAIN,
-            token_exchange_rate,
-            gas_price
-        );
-
-        // required gas
-        let required_gas_amount = (hp_igps::igps::quote_gas_payment(DESTINATION_DOMAIN,
-            native_token::get_default_gas_amount()) as u64);
+        let required_gas_amount = set_igps_for_test(&hp_igps, DESTINATION_DOMAIN,
+            native_token::get_default_gas_amount(),
+            gas_price, token_exchange_rate);
 
         let hp_token_address = signer::address_of(&hp_token);
         let alice_address = signer::address_of(&alice);

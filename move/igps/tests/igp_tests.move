@@ -8,17 +8,11 @@ module hp_igps::igp_tests {
   use hp_igps::igps;
   use hp_igps::gas_oracle;
   use hp_library::test_utils;
+  use hp_igps::test_utils::init_igps_for_test;
 
   const BSC_TESTNET_DOMAIN: u32 = 97;
   const BSC_MAINNET_DOMAIN: u32 = 56;
   const TOKEN_EXCHANGE_RATE_SCALE: u256 = 10_000_000_000;
-
-  public fun init_igps_for_test(hp_igps: &signer) {
-    // init `gas_oracle` module with contract account
-    gas_oracle::init_for_test(hp_igps);
-    // init `igps` module with contract account
-    igps::init_for_test(hp_igps);
-  }
 
   #[test(aptos_framework = @0x1, hp_igps=@hp_igps, alice = @0xa11ce)]
   fun set_remote_gas_data_test(aptos_framework: signer, hp_igps: signer, alice: signer) {
