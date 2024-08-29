@@ -196,6 +196,8 @@ module hp_token::native_tests {
         // This method will check signatures, threshold and doesn mint/transfer
         // on the other chain
         native_token::handle_message(message_bytes, metadata_bytes);
+
+        // check balances
     }
 
     fun ensure_validator_address(expected_eth_address: address,

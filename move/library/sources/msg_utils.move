@@ -99,6 +99,10 @@ module hp_library::msg_utils {
         result
     }
 
+    public fun amount_from_token_message(bytes: &vector<u8>): u64 {
+        from_bcs::to_u64(extract_from_bytes(bytes, 0, 8))
+    }
+
     #[test_only]
     public fun format_message_and_digest(
         root: vector<u8>,

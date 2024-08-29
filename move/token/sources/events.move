@@ -12,4 +12,18 @@ module hp_token::events {
     ): SentTransferRemote {
         SentTransferRemote { destination, recipient, amount }
     }
+
+    struct ReceivedTransferRemote has store, drop {
+        origin: u32,
+        recipient: address,
+        amount: u64
+    }
+
+    public fun new_received_transfer_remote_event(
+        origin: u32,
+        recipient: address,
+        amount: u64
+    ): ReceivedTransferRemote {
+        ReceivedTransferRemote { origin, recipient, amount }
+    }
 }

@@ -8,9 +8,8 @@ module hp_token::native_token {
     use hp_library::msg_utils;
     use hp_mailbox::mailbox;
     use hp_router::router;
-    use hp_token::events::{Self, SentTransferRemote};
+    use hp_token::events::{Self, SentTransferRemote, ReceivedTransferRemote};
     use std::signer;
-    use std::vector;
 
     const DEFAULT_GAS_AMOUNT: u256 = 1_000_000_000;
 
@@ -27,10 +26,10 @@ module hp_token::native_token {
 
     struct State has key {
         cap: router::RouterCap<NativeToken>,
-        received_messages: vector<vector<u8>>,
         // holds funds
         beneficiary: address,
         sent_transfer_remote_events: EventHandle<SentTransferRemote>,
+        received_transfer_remote_events: EventHandle<ReceivedTransferRemote>,
     }
 
     /// Initialize Module
@@ -41,9 +40,9 @@ module hp_token::native_token {
         let cap = router::init<NativeToken>(account);
         move_to<State>(account, State {
             cap,
-            received_messages: vector::empty(),
             beneficiary: account_address,
             sent_transfer_remote_events: account::new_event_handle<SentTransferRemote>(account),
+            received_transfer_remote_events: account::new_event_handle<ReceivedTransferRemote>(account),
         });
     }
 
@@ -101,8 +100,23 @@ module hp_token::native_token {
             &state.cap
         );
 
-        // TODO: coin1: add logic to mint native token on aptos
-        vector::push_back(&mut state.received_messages, msg_utils::body(&message));
+        // transfer coins
+        // get token message
+        let token_message = msg_utils::body(&message);
+        // extract amount to transfer
+        let amount = msg_utils::amount_from_token_message(&token_message);
+
+        // emit SentTransferRemote event;
+        let recipient = msg_utils::recipient(&message);
+        let origin_domain = msg_utils::origin_domain(&message);
+        event::emit_event<ReceivedTransferRemote>(
+            &mut state.received_transfer_remote_events,
+            events::new_received_transfer_remote_event(
+                origin_domain,
+                recipient,
+                amount
+            )
+        );
     }
 
     #[test_only]
