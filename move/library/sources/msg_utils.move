@@ -7,7 +7,7 @@ module hp_library::msg_utils {
     use aptos_std::aptos_hash;
 
     use hp_library::utils::{ extract_from_bytes, extract_from_bytes_reversed,
-        eth_signed_message_hash, ism_checkpoint_hash, get_version};
+        ism_checkpoint_hash, get_version};
 
     /// Convert message data into bytes
     public fun format_message_into_bytes(
@@ -125,13 +125,13 @@ module hp_library::msg_utils {
         // generate digest to sign
         // TODO: coin1: why message hash is not part of the digest?
         // can it be altered during transit to change amount of tokens to transfer?
-        let digest_bytes_to_sign = eth_signed_message_hash(&ism_checkpoint_hash(
+        let digest_bytes_to_sign = ism_checkpoint_hash(
             mailbox_address,
             domain_origin,
             root,
             nonce,
             message_id
-        ));
+        );
         (message_bytes, digest_bytes_to_sign)
     }
 }

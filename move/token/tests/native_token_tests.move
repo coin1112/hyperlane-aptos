@@ -84,7 +84,7 @@ module hp_token::native_tests {
         igp_tests::init_igps_for_test(&hp_igps);
 
         // send tokens
-        let amount: u64 = 10;
+        let amount: u64 = 11;
         native_token::transfer_remote(&alice, BSC_TESTNET_DOMAIN, amount);
 
         // check message is in mailbox
@@ -109,18 +109,18 @@ module hp_token::native_tests {
 
         // if this fails you would need to use sign_msg.js to get a new digest_bytes_signature below
         // it is not possible to sign inside move
-        assert!(&digest_bytes_to_sign == &x"367c815be770c0b6de0249ce32c68512365ffcda8f586726527df3e7169e406d", 0);
+        assert!(&digest_bytes_to_sign == &x"833f11f904885f99080f807880c2ab226dd6355904727e5c44d175464fb48e15", 0);
 
         // A test signature from this Ethereum address:
-        //   Address: 0xae58d95bfd2ea752280279f73a1ba40de7336349
+        //   Address: 0x050D907812D2D2de09Ba8D6cE414d6fee84C29Cb
         //   Private Key: 0xe1434ec74549ce4c3d6eded91a0656f864b0982fdb196ef511921efc25dfc499
-        //   Public Key: 0x6bbae7820a27ff21f28ba5a4b64c8b746cdd95e2b3264a686dd15651ef90a2a1
+        //   Public Key: 0x6bbae7820a27ff21f28ba5a4b64c8b746cdd95e2b3264a686dd15651ef90a2a1 // LN1_ISMS_ADDRESS
         // The signature was generated using ethers-js:
         //   wallet = new ethers.Wallet('0xe1434ec74549ce4c3d6eded91a0656f864b0982fdb196ef511921efc25dfc499')
         //   await wallet.signMessage(ethers.utils.arrayify('0x367c815be770c0b6de0249ce32c68512365ffcda8f586726527df3e7169e406d'))
 
         // use 'node sign_msg.js' to sign a message in message_bytes if digest_bytes_to_sign changes
-        let digest_bytes_signature = x"e1a9fc3bb217af017d85c5877003b45afd5a24f06ec37657b3648f36512ebac264864d075699d2f9d0c136975f2c5253deaaefb46c05f80d1370366b0afc89fa1b";
+        let digest_bytes_signature = x"130561d338ef69a4c77753b561bda5fddd4b0552b382fe616ec07bfaa2e993d5257012d8311962f0aebd610dd10bbe898dde4777b39e358d0e587c1e5e20e5f71c";
 
         // package signature and othjer attributes into checkpoint metadata just like a validator
         let metadata_bytes = ism_metadata::format_signature_into_bytes(
@@ -135,10 +135,11 @@ module hp_token::native_tests {
         // as native_token::handle_message() below calls veryfy() inside and expects this address
         // If a signer address changes, replace isms1_eth_address with a new value produced by
         // secp256k1_recover_ethereum_address()
-        let eth_address_opt = utils::secp256k1_recover_ethereum_address(&digest_bytes_to_sign, &digest_bytes_signature);
+        let digest_bytes_hash = utils::eth_signed_message_hash(&digest_bytes_to_sign);
+        let eth_address_opt = utils::secp256k1_recover_ethereum_address(&digest_bytes_hash, &digest_bytes_signature);
         assert!(option::is_some(&eth_address_opt), 0);
         let eth_address_bytes = option::borrow(&eth_address_opt);
-        let isms1_eth_address = @0x9dc0a7b8848c70c742837d12486adba7a21466e2;
+        let isms1_eth_address = @0x050D907812D2D2de09Ba8D6cE414d6fee84C29Cb;
 
         std::debug::print<std::string::String>(&std::string::utf8(b"-----eth_address_bytes------------"));
         std::debug::print(eth_address_bytes);

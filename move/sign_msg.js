@@ -17,6 +17,12 @@ async function main() {
   // Initialize a wallet instance with the provided private key
   const wallet = new ethers.Wallet(privateKey);
 
+  // Get the Ethereum address associated with the wallet
+  const address = wallet.address;
+
+  // Output the Ethereum address
+  console.log('Ethereum Address:', address);
+
   // Convert the message to a byte array
   const messageBytes = ethers.utils.arrayify(message);
 
