@@ -1,28 +1,28 @@
 #[test_only]
 module hp_token::native_tests {
-    use std::vector;
-    use std::signer;
-    use std::features;
-    use std::debug;
-    use std::option;
-    use std::bcs;
-    use aptos_framework::block;
-    use aptos_framework::account;
-    use hp_library::account_utils::derive_address_from_public_key;
 
-    use hp_mailbox::mailbox;
+    use aptos_framework::account;
+    use aptos_framework::aptos_coin::AptosCoin;
+    use aptos_framework::block;
+    use aptos_framework::coin::Self;
     use hp_igps::igp_tests;
+    use hp_isms::multisig_ism;
+    use hp_library::account_utils::derive_address_from_public_key;
+    use hp_library::h256::{Self, H256};
+    use hp_library::ism_metadata;
+    use hp_library::msg_utils;
     use hp_library::test_utils;
+    use hp_library::utils;
+    use hp_mailbox::mailbox;
     use hp_router::router::{Self, RouterCap};
     use hp_token::native_token::{Self, NativeToken};
-    use hp_library::utils;
-    use hp_library::msg_utils;
-    use hp_library::ism_metadata;
-    use hp_library::h256::{Self, H256};
-    use hp_isms::multisig_ism;
+    use std::bcs;
+    use std::debug;
+    use std::features;
+    use std::option;
+    use std::signer;
+    use std::vector;
 
-    use aptos_framework::coin::Self;
-    use aptos_framework::aptos_coin::AptosCoin;
 
     const APTOS_TESTNET_DOMAIN: u32 = 14402;
     const DESTINATION_DOMAIN: u32 = 14402; // use destination chain the same as origin
@@ -41,12 +41,17 @@ module hp_token::native_tests {
         hp_igps= @hp_igps,
         hp_isms= @hp_isms,
         hp_token= @hp_token,
-        alice= @0xa11ce
+        alice= @0xa11ce,
+        bob = @0xb0b,
     )]
     fun dispatch_handle_test(aptos_framework: signer, hp_router: signer,
                              hp_mailbox: signer, hp_igps: signer, hp_isms: signer,
-                             hp_token: signer, alice: signer) {
-        test_utils::setup(&aptos_framework, &hp_token, vector[@hp_mailbox, @hp_token, @hp_igps, @hp_isms, @0xa11ce]);
+                             hp_token: signer, alice: signer, bob: signer) {
+        test_utils::setup(
+            &aptos_framework,
+            &hp_token,
+            vector[@hp_mailbox, @hp_token, @hp_igps, @hp_isms, @0xa11ce, @0xb0b]
+        );
 
         // enable auid feature because mailbox needs to call `get_transaction_hash()`
         let feature = features::get_auids();
@@ -85,7 +90,7 @@ module hp_token::native_tests {
 
         // init gas paymaster for gas transfers first
         igp_tests::init_igps_for_test(&hp_igps);
-        
+
         // set up gas oracle
         // set exchange rate: 1 x 1
         let token_exchange_rate = 10_000_000_000;
@@ -106,6 +111,7 @@ module hp_token::native_tests {
 
         let hp_token_address = signer::address_of(&hp_token);
         let alice_address = signer::address_of(&alice);
+        let bob_address = signer::address_of(&bob);
         let igps_address = signer::address_of(&hp_igps);
 
         // check balance pre-transfer
@@ -115,7 +121,10 @@ module hp_token::native_tests {
 
         // send tokens
         let amount: u64 = 12;
-        native_token::transfer_remote(&alice, DESTINATION_DOMAIN, amount);
+        native_token::transfer_remote(&alice,
+            DESTINATION_DOMAIN,
+            bcs::to_bytes<address>(&bob_address),
+            amount);
 
         // check balance post-transfer
         let hp_token_balance_post = coin::balance<AptosCoin>(hp_token_address);
@@ -138,7 +147,7 @@ module hp_token::native_tests {
         let (root, count) = mailbox::outbox_latest_checkpoint();
 
         // format message and its digest to sign just like a validator would do
-        let message_body = msg_utils::format_transfer_remote_msg_to_bytes(amount);
+        let token_message_bytes = msg_utils::format_token_message(amount);
         let (message_bytes, digest_bytes_to_sign) = msg_utils::format_message_and_digest(root,
             count - 1,
             APTOS_TESTNET_DOMAIN,
@@ -146,7 +155,7 @@ module hp_token::native_tests {
             signer::address_of(&hp_mailbox),
             DESTINATION_DOMAIN,
             destination_router,
-            message_body);
+            token_message_bytes);
 
         std::debug::print<std::string::String>(&std::string::utf8(b"-----digest_bytes_to_sign------------"));
         std::debug::print(&digest_bytes_to_sign);

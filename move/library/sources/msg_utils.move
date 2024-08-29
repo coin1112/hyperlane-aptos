@@ -89,7 +89,7 @@ module hp_library::msg_utils {
     }
 
     // Serialize transfer_remote() data into byte arry to send to the other chain
-    public fun format_transfer_remote_msg_to_bytes(
+    public fun format_token_message(
         amount: u64,
     ): vector<u8> {
         let result = vector::empty<u8>();
@@ -123,8 +123,8 @@ module hp_library::msg_utils {
         let message_id = id(&message_bytes);
 
         // generate digest to sign
-        // TODO: coin1: why message hash is not part of the digest?
-        // can it be altered during transit to change amount of tokens to transfer?
+        // note that message_id is derived as a hash of the full message
+        // which gurantees message integrity
         let digest_bytes_to_sign = ism_checkpoint_hash(
             mailbox_address,
             domain_origin,

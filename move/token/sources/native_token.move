@@ -1,15 +1,17 @@
 /// Native hyperlane token
 
 module hp_token::native_token {
-    use std::vector;
-    use std::signer;
-    use hp_router::router;
+    use aptos_framework::account;
+    use aptos_framework::aptos_coin::AptosCoin;
+    use aptos_framework::coin::Self;
+    use aptos_framework::event::{Self, EventHandle};
+    use hp_library::msg_utils;
     use hp_library::token_msg_utils;
     use hp_mailbox::mailbox;
-    use hp_library::msg_utils;
-
-    use aptos_framework::coin::Self;
-    use aptos_framework::aptos_coin::AptosCoin;
+    use hp_router::router;
+    use hp_token::events::{Self, SentTransferRemote};
+    use std::signer;
+    use std::vector;
 
     const DEFAULT_GAS_AMOUNT: u256 = 1_000_000_000;
 
@@ -29,6 +31,7 @@ module hp_token::native_token {
         received_messages: vector<vector<u8>>,
         // holds funds
         beneficiary: address,
+        sent_transfer_remote_events: EventHandle<SentTransferRemote>,
     }
 
     /// Initialize Module
@@ -41,6 +44,7 @@ module hp_token::native_token {
             cap,
             received_messages: vector::empty(),
             beneficiary: account_address,
+            sent_transfer_remote_events: account::new_event_handle<SentTransferRemote>(account),
         });
     }
 
@@ -49,16 +53,17 @@ module hp_token::native_token {
     public entry fun transfer_remote(
         account: &signer,
         dest_domain: u32,
+        recipient: vector<u8>,
         amount: u64,
     ) acquires State {
-        let state = borrow_global<State>(@hp_token);
+        let state = borrow_global_mut<State>(@hp_token);
 
-        let account_address  = signer::address_of(account);
+        let account_address = signer::address_of(account);
 
         // Check if the account has enough balance
         let balance = coin::balance<AptosCoin>(account_address);
         assert!(balance >= amount, E_INSUFFICIENT_BALANCE);
-        let message_body = msg_utils::format_transfer_remote_msg_to_bytes(amount);
+        let message_body = msg_utils::format_token_message(amount);
 
         // send amount to beneficiary
         let coin = coin::withdraw<AptosCoin>(account, amount);
@@ -70,6 +75,16 @@ module hp_token::native_token {
             message_body,
             DEFAULT_GAS_AMOUNT,
             &state.cap
+        );
+
+        // emit SentTransferRemote event
+        event::emit_event<SentTransferRemote>(
+            &mut state.sent_transfer_remote_events,
+            events::new_sent_transfer_remote_event(
+                dest_domain,
+                recipient,
+                amount
+            )
         );
     }
 
@@ -97,7 +112,7 @@ module hp_token::native_token {
     }
 
     #[test_only]
-    public fun get_default_gas_amount() : u256 {
+    public fun get_default_gas_amount(): u256 {
         DEFAULT_GAS_AMOUNT
     }
 }
