@@ -164,7 +164,7 @@ module hp_token::native_tests {
         // node sign_msg.js 0xe1434ec74549ce4c3d6eded91a0656f864b0982fdb196ef511921efc25dfc499 0x3e5bacbed4b23d07bba9315c637f8b5f6e58e1c1e70c95ca295039bcd8804b97
         let digest_bytes_signature = x"99c14fc832785f095f9d5fe41c4b1b6dc277bb99d19c0cf6b03c52e71bcdce25267add0e474b44791744a8446cef2f411c9baccc49e93ea64fdf9e76579385211c";
 
-        // package signature and othjer attributes into checkpoint metadata just like a validator
+        // package signature and other attributes into checkpoint metadata just like a validator
         let metadata_bytes = ism_metadata::format_signature_into_bytes(
             signer::address_of(&hp_mailbox),
             root,
@@ -172,25 +172,11 @@ module hp_token::native_tests {
             digest_bytes_signature
         );
 
-        // Derive validator ethereum address
-        // This test is to ensure that signing key hasn't changed
-        // as native_token::handle_message() below calls veryfy() inside and expects this address
-        // If a signer address changes, replace isms1_eth_address with a new value produced by
-        // secp256k1_recover_ethereum_address()
-        let digest_bytes_hash = utils::eth_signed_message_hash(&digest_bytes_to_sign);
-        let eth_address_opt = utils::secp256k1_recover_ethereum_address(&digest_bytes_hash, &digest_bytes_signature);
-        assert!(option::is_some(&eth_address_opt), 0);
-        let eth_address_bytes = option::borrow(&eth_address_opt);
+        // ensure that correct validator address can be derived from signed message
         let isms1_eth_address = @0x050D907812D2D2de09Ba8D6cE414d6fee84C29Cb;
-
-        std::debug::print<std::string::String>(&std::string::utf8(b"-----eth_address_bytes------------"));
-        std::debug::print(eth_address_bytes);
-
-        // make sure it matches expected address for LN1_ISMS_ADDRESS
-        assert!(utils::compare_bytes_and_address(
-            eth_address_bytes,
-            &isms1_eth_address
-        ), 0);
+        ensure_validator_address(isms1_eth_address,
+            digest_bytes_to_sign,
+            digest_bytes_signature);
 
         // init ism
         // interchain security module is responsible
@@ -209,5 +195,28 @@ module hp_token::native_tests {
         // This method will check signatures, threshold and doesn mint/transfer
         // on the other chain
         native_token::handle_message(message_bytes, metadata_bytes);
+    }
+
+    fun ensure_validator_address(expected_eth_address: address,
+                                 digest_bytes_to_sign: vector<u8>,
+                                 digest_bytes_signature: vector<u8>) {
+        // Derive validator ethereum address
+        // This test is to ensure that signing key hasn't changed
+        // as native_token::handle_message() below calls veryfy() inside and expects this address
+        // If a signer address changes, replace isms1_eth_address with a new value produced by
+        // secp256k1_recover_ethereum_address()
+        let digest_bytes_hash = utils::eth_signed_message_hash(&digest_bytes_to_sign);
+        let eth_address_opt = utils::secp256k1_recover_ethereum_address(&digest_bytes_hash, &digest_bytes_signature);
+        assert!(option::is_some(&eth_address_opt), 0);
+        let eth_address_bytes = option::borrow(&eth_address_opt);
+
+        std::debug::print<std::string::String>(&std::string::utf8(b"-----eth_address_bytes------------"));
+        std::debug::print(eth_address_bytes);
+
+        // make sure it matches expected address for LN1_ISMS_ADDRESS
+        assert!(utils::compare_bytes_and_address(
+            eth_address_bytes,
+            &expected_eth_address
+        ), 0);
     }
 }
