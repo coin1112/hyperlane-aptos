@@ -84,7 +84,7 @@ module hp_token::native_tests {
         igp_tests::init_igps_for_test(&hp_igps);
 
         // send tokens
-        let amount: u64 = 11;
+        let amount: u64 = 12;
         native_token::transfer_remote(&alice, BSC_TESTNET_DOMAIN, amount);
 
         // check message is in mailbox
@@ -109,7 +109,7 @@ module hp_token::native_tests {
 
         // if this fails you would need to use sign_msg.js to get a new digest_bytes_signature below
         // it is not possible to sign inside move
-        assert!(&digest_bytes_to_sign == &x"833f11f904885f99080f807880c2ab226dd6355904727e5c44d175464fb48e15", 0);
+        assert!(&digest_bytes_to_sign == &x"3e5bacbed4b23d07bba9315c637f8b5f6e58e1c1e70c95ca295039bcd8804b97", 0);
 
         // A test signature from this Ethereum address:
         //   Address: 0x050D907812D2D2de09Ba8D6cE414d6fee84C29Cb
@@ -117,10 +117,11 @@ module hp_token::native_tests {
         //   Public Key: 0x6bbae7820a27ff21f28ba5a4b64c8b746cdd95e2b3264a686dd15651ef90a2a1 // LN1_ISMS_ADDRESS
         // The signature was generated using ethers-js:
         //   wallet = new ethers.Wallet('0xe1434ec74549ce4c3d6eded91a0656f864b0982fdb196ef511921efc25dfc499')
-        //   await wallet.signMessage(ethers.utils.arrayify('0x367c815be770c0b6de0249ce32c68512365ffcda8f586726527df3e7169e406d'))
+        //   await wallet.signMessage(ethers.utils.arrayify('0x3e5bacbed4b23d07bba9315c637f8b5f6e58e1c1e70c95ca295039bcd8804b97'))
 
-        // use 'node sign_msg.js' to sign a message in message_bytes if digest_bytes_to_sign changes
-        let digest_bytes_signature = x"130561d338ef69a4c77753b561bda5fddd4b0552b382fe616ec07bfaa2e993d5257012d8311962f0aebd610dd10bbe898dde4777b39e358d0e587c1e5e20e5f71c";
+        // Or use 'node sign_msg.js' to sign a message in message_bytes if digest_bytes_to_sign changes
+        // node sign_msg.js 0xe1434ec74549ce4c3d6eded91a0656f864b0982fdb196ef511921efc25dfc499 0x3e5bacbed4b23d07bba9315c637f8b5f6e58e1c1e70c95ca295039bcd8804b97
+        let digest_bytes_signature = x"99c14fc832785f095f9d5fe41c4b1b6dc277bb99d19c0cf6b03c52e71bcdce25267add0e474b44791744a8446cef2f411c9baccc49e93ea64fdf9e76579385211c";
 
         // package signature and othjer attributes into checkpoint metadata just like a validator
         let metadata_bytes = ism_metadata::format_signature_into_bytes(
