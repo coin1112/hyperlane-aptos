@@ -173,6 +173,7 @@ module hp_token::native_tests {
         );
 
         // ensure that correct validator address can be derived from signed message
+        // LN1_ISMS_ADDRESS
         let isms1_eth_address = @0x050D907812D2D2de09Ba8D6cE414d6fee84C29Cb;
         ensure_validator_address(isms1_eth_address,
             digest_bytes_to_sign,
@@ -213,7 +214,7 @@ module hp_token::native_tests {
         std::debug::print<std::string::String>(&std::string::utf8(b"-----eth_address_bytes------------"));
         std::debug::print(eth_address_bytes);
 
-        // make sure it matches expected address for LN1_ISMS_ADDRESS
+        // make sure it matches expected address
         assert!(utils::compare_bytes_and_address(
             eth_address_bytes,
             &expected_eth_address
