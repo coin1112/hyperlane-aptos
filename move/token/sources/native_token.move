@@ -8,6 +8,11 @@ module hp_token::native_token {
 
     const DEFAULT_GAS_AMOUNT: u256 = 1_000_000_000;
 
+    // Native token router
+    // Used to send native tokens to another network
+    // A native token is the one used to pay for gas on network such as APT or ETH
+    // On the other chain it is represented by a synthetic token suth as ETH on Optimism
+    // which is a still "native" token on that chain, but has a collateral on the main (ETH) chain
     struct NativeToken {}
 
     struct State has key {
