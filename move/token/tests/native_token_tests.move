@@ -21,8 +21,11 @@ module hp_token::native_tests {
     use hp_library::h256::{Self, H256};
     use hp_isms::multisig_ism;
 
+    use aptos_framework::coin::Self;
+    use aptos_framework::aptos_coin::AptosCoin;
+
     const APTOS_TESTNET_DOMAIN: u32 = 14402;
-    const BSC_TESTNET_DOMAIN: u32 = 14402; // use destination chain the same as origin
+    const DESTINATION_DOMAIN: u32 = 14402; // use destination chain the same as origin
 
     // Send and receive a native token test
     // A native token is a token like aptos on aptos or eth on ethereum
@@ -72,20 +75,61 @@ module hp_token::native_tests {
         // enroll a remote token router which handles native token transfer on the other chain
         // since we use the same chain the remote router is the same as the sending one - hp_token
         // in real scenario the receiving router would be a synthetic token router
-        let bsc_testnet_router = bcs::to_bytes(&signer::address_of(&hp_token));
-        router::enroll_remote_router<NativeToken>(&hp_token, BSC_TESTNET_DOMAIN, bsc_testnet_router);
+        let destination_router = bcs::to_bytes(&signer::address_of(&hp_token));
+        router::enroll_remote_router<NativeToken>(&hp_token, DESTINATION_DOMAIN, destination_router);
 
         // check routers and domains
-        assert!(router::get_remote_router_for_test<NativeToken>(BSC_TESTNET_DOMAIN) == bsc_testnet_router, 0);
-        assert!(router::get_routers<NativeToken>() == vector[bsc_testnet_router], 0);
-        assert!(router::get_domains<NativeToken>() == vector[BSC_TESTNET_DOMAIN], 0);
+        assert!(router::get_remote_router_for_test<NativeToken>(DESTINATION_DOMAIN) == destination_router, 0);
+        assert!(router::get_routers<NativeToken>() == vector[destination_router], 0);
+        assert!(router::get_domains<NativeToken>() == vector[DESTINATION_DOMAIN], 0);
 
-        // init gas paypaster for gas transfers first
+        // init gas paymaster for gas transfers first
         igp_tests::init_igps_for_test(&hp_igps);
+        
+        // set up gas oracle
+        // set exchange rate: 1 x 1
+        let token_exchange_rate = 10_000_000_000;
+        // network gas price
+        let gas_price = 10;
+
+        // set gas data
+        hp_igps::gas_oracle::set_remote_gas_data(
+            &hp_igps,
+            DESTINATION_DOMAIN,
+            token_exchange_rate,
+            gas_price
+        );
+
+        // required gas
+        let required_gas_amount = (hp_igps::igps::quote_gas_payment(DESTINATION_DOMAIN,
+            native_token::get_default_gas_amount()) as u64);
+
+        let hp_token_address = signer::address_of(&hp_token);
+        let alice_address = signer::address_of(&alice);
+        let igps_address = signer::address_of(&hp_igps);
+
+        // check balance pre-transfer
+        let hp_token_balance_pre = coin::balance<AptosCoin>(hp_token_address);
+        let alice_balance_pre = coin::balance<AptosCoin>(alice_address);
+        let igps_balance_pre = coin::balance<AptosCoin>(igps_address);
 
         // send tokens
         let amount: u64 = 12;
-        native_token::transfer_remote(&alice, BSC_TESTNET_DOMAIN, amount);
+        native_token::transfer_remote(&alice, DESTINATION_DOMAIN, amount);
+
+        // check balance post-transfer
+        let hp_token_balance_post = coin::balance<AptosCoin>(hp_token_address);
+        let alice_balance_post = coin::balance<AptosCoin>(alice_address);
+        let igps_balance_post = coin::balance<AptosCoin>(igps_address);
+
+        // hp_token balance increased by amount
+        assert!(hp_token_balance_post - hp_token_balance_pre == amount, 0);
+
+        // alice balance decreased by amount
+        assert!(alice_balance_pre - alice_balance_post == amount + required_gas_amount, 0);
+
+        // gas paymaster balance increased
+        assert!(igps_balance_post - igps_balance_pre == required_gas_amount, 0);
 
         // check message is in mailbox
         assert!(mailbox::outbox_get_count() == 1, 0);
@@ -100,8 +144,8 @@ module hp_token::native_tests {
             APTOS_TESTNET_DOMAIN,
             signer::address_of(&hp_token),
             signer::address_of(&hp_mailbox),
-            BSC_TESTNET_DOMAIN,
-            bsc_testnet_router,
+            DESTINATION_DOMAIN,
+            destination_router,
             message_body);
 
         std::debug::print<std::string::String>(&std::string::utf8(b"-----digest_bytes_to_sign------------"));
@@ -161,7 +205,7 @@ module hp_token::native_tests {
             &hp_isms,
             vector[isms1_eth_address],
             1, // threshold
-            BSC_TESTNET_DOMAIN   // origin_domain
+            DESTINATION_DOMAIN   // origin_domain
         );
 
         // handle message

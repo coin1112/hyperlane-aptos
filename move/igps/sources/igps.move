@@ -57,6 +57,9 @@ module hp_igps::igps {
     // calculate interchain gas amount
     let required_amount = (quote_gas_payment(dest_domain, gas_amount) as u64);
 
+    std::debug::print<std::string::String>(&std::string::utf8(b"-----required_amount------------"));
+    std::debug::print(&required_amount);
+
     // check account's balance if it is enough to pay interchain gas
     assert!(coin::balance<AptosCoin>(account_address) > required_amount, ERROR_INSUFFICIENT_INTERCHAIN_GAS);
     
