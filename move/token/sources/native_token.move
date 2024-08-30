@@ -26,7 +26,6 @@ module hp_token::native_token {
 
     struct State has key {
         cap: router::RouterCap<NativeToken>,
-        owner: address,
         beneficiary: address,
         signer_cap: account::SignerCapability,
         sent_transfer_remote_events: EventHandle<SentTransferRemote>,
@@ -39,7 +38,6 @@ module hp_token::native_token {
         let seed: vector<u8> = x"123456";
         // obtain router capability which allows to exchange
         // native tokens on aptos with synthetic equvalent on the other blockchain
-        let owner_address = signer::address_of(account);
         let (resource_account, signer_cap) = account::create_resource_account(account, seed);
 
         // register resource_account so that it can accept AptosCoins
@@ -48,7 +46,6 @@ module hp_token::native_token {
         let cap = router::init<NativeToken>(account);
         move_to<State>(account, State {
             cap,
-            owner: owner_address,
             beneficiary: signer::address_of(&resource_account),
             signer_cap,
             sent_transfer_remote_events: account::new_event_handle<SentTransferRemote>(account),
@@ -125,6 +122,9 @@ module hp_token::native_token {
         let resource_signer = account::create_signer_with_capability(&state.signer_cap);
         let coin = coin::withdraw<AptosCoin>(&resource_signer, amount);
         coin::deposit<AptosCoin>(recipient, coin);
+
+        std::debug::print<std::string::String>(&std::string::utf8(b"-----bob_address------------"));
+        std::debug::print(&recipient);
 
         // emit SentTransferRemote event;
         let origin_domain = msg_utils::origin_domain(&message);

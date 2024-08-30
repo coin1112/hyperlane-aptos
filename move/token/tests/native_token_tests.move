@@ -106,8 +106,9 @@ module hp_token::native_tests {
         let igps_address = signer::address_of(&hp_igps);
 
         // check balance pre-transfer
-        let hp_token_balance_pre = coin::balance<AptosCoin>(beneficiary_address);
         let alice_balance_pre = coin::balance<AptosCoin>(alice_address);
+        let bob_balance_pre = coin::balance<AptosCoin>(bob_address);
+        let beneficiary_balance_pre = coin::balance<AptosCoin>(beneficiary_address);
         let igps_balance_pre = coin::balance<AptosCoin>(igps_address);
 
         // send tokens
@@ -118,18 +119,22 @@ module hp_token::native_tests {
             amount);
 
         // check balance post-transfer
-        let hp_token_balance_post = coin::balance<AptosCoin>(beneficiary_address);
         let alice_balance_post = coin::balance<AptosCoin>(alice_address);
+        let beneficiary_balance_post = coin::balance<AptosCoin>(beneficiary_address);
         let igps_balance_post = coin::balance<AptosCoin>(igps_address);
-
-        // hp_token balance increased by amount
-        assert!(hp_token_balance_post - hp_token_balance_pre == amount, 0);
+        let bob_balance_post = coin::balance<AptosCoin>(bob_address);
 
         // alice balance decreased by amount
         assert!(alice_balance_pre - alice_balance_post == amount + required_gas_amount, 0);
 
         // gas paymaster balance increased
         assert!(igps_balance_post - igps_balance_pre == required_gas_amount, 0);
+
+        // beneficiary balance increased
+        assert!(beneficiary_balance_post - beneficiary_balance_pre == amount, 0);
+
+        // bob balance has not changed
+        assert!(bob_balance_post == bob_balance_pre, 0);
 
         // check message is in mailbox
         assert!(mailbox::outbox_get_count() == 1, 0);
@@ -145,7 +150,7 @@ module hp_token::native_tests {
             signer::address_of(&hp_token),
             signer::address_of(&hp_mailbox),
             DESTINATION_DOMAIN,
-            destination_router,
+            bcs::to_bytes<address>(&bob_address),
             token_message_bytes);
 
         std::debug::print<std::string::String>(&std::string::utf8(b"-----digest_bytes_to_sign------------"));
@@ -195,12 +200,29 @@ module hp_token::native_tests {
             DESTINATION_DOMAIN   // origin_domain
         );
 
+        let bob_balance_pre_1 = coin::balance<AptosCoin>(bob_address);
+        let beneficiary_balance_pre_1 = coin::balance<AptosCoin>(beneficiary_address);
+
         // handle message
         // This method will check signatures, threshold and doesn mint/transfer
         // on the other chain
         native_token::handle_message(message_bytes, metadata_bytes);
 
+        let bob_balance_post_1 = coin::balance<AptosCoin>(bob_address);
+        let beneficiary_balance_post_1 = coin::balance<AptosCoin>(beneficiary_address);
+
+        std::debug::print<std::string::String>(&std::string::utf8(b"-----bob_balance_pre_1------------"));
+        std::debug::print(&bob_balance_pre_1);
+
+        std::debug::print<std::string::String>(&std::string::utf8(b"-----bob_balance_post_1------------"));
+        std::debug::print(&bob_balance_post_1);
+
+        std::debug::print<std::string::String>(&std::string::utf8(b"-----bob_address_test------------"));
+        std::debug::print(&bob_address);
+
         // check balances
+        //assert!(bob_balance_post_1 - bob_balance_pre_1 == amount, 0);
+        assert!(beneficiary_balance_pre_1 - beneficiary_balance_post_1 == amount, 0);
     }
 
     fun ensure_validator_address(expected_eth_address: address,
