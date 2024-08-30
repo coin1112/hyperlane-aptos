@@ -26,21 +26,31 @@ module hp_token::native_token {
 
     struct State has key {
         cap: router::RouterCap<NativeToken>,
-        // holds funds
+        owner: address,
         beneficiary: address,
+        signer_cap: account::SignerCapability,
         sent_transfer_remote_events: EventHandle<SentTransferRemote>,
         received_transfer_remote_events: EventHandle<ReceivedTransferRemote>,
     }
 
     /// Initialize Module
     fun init_module(account: &signer) {
+        // todo: coin1 get a random seed
+        let seed: vector<u8> = x"123456";
         // obtain router capability which allows to exchange
         // native tokens on aptos with synthetic equvalent on the other blockchain
-        let account_address = signer::address_of(account);
+        let owner_address = signer::address_of(account);
+        let (resource_account, signer_cap) = account::create_resource_account(account, seed);
+
+        // register resource_account so that it can accept AptosCoins
+        coin::register<AptosCoin>(&resource_account);
+
         let cap = router::init<NativeToken>(account);
         move_to<State>(account, State {
             cap,
-            beneficiary: account_address,
+            owner: owner_address,
+            beneficiary: signer::address_of(&resource_account),
+            signer_cap,
             sent_transfer_remote_events: account::new_event_handle<SentTransferRemote>(account),
             received_transfer_remote_events: account::new_event_handle<ReceivedTransferRemote>(account),
         });
@@ -105,9 +115,18 @@ module hp_token::native_token {
         let token_message = msg_utils::body(&message);
         // extract amount to transfer
         let amount = msg_utils::amount_from_token_message(&token_message);
+        let recipient = msg_utils::recipient(&message);
+
+        // Check if the beneficiary has enough balance
+        let balance = coin::balance<AptosCoin>(state.beneficiary);
+        assert!(balance >= amount, E_INSUFFICIENT_BALANCE);
+
+        // transfer to recipient
+        let resource_signer = account::create_signer_with_capability(&state.signer_cap);
+        let coin = coin::withdraw<AptosCoin>(&resource_signer, amount);
+        coin::deposit<AptosCoin>(recipient, coin);
 
         // emit SentTransferRemote event;
-        let recipient = msg_utils::recipient(&message);
         let origin_domain = msg_utils::origin_domain(&message);
         event::emit_event<ReceivedTransferRemote>(
             &mut state.received_transfer_remote_events,
@@ -117,6 +136,13 @@ module hp_token::native_token {
                 amount
             )
         );
+    }
+
+    #[view]
+    /// Get beneficiary, e.g. address containing reserve of transferred coins
+    public fun get_beneficiary(): address acquires State {
+        let state = borrow_global<State>(@hp_token);
+        state.beneficiary
     }
 
     #[test_only]

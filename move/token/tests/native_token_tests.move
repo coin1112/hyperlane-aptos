@@ -22,6 +22,7 @@ module hp_token::native_tests {
     use std::option;
     use std::signer;
     use std::vector;
+    use aptos_std::from_bcs::to_bytes;
 
 
     const APTOS_TESTNET_DOMAIN: u32 = 14402;
@@ -97,13 +98,15 @@ module hp_token::native_tests {
             native_token::get_default_gas_amount(),
             gas_price, token_exchange_rate);
 
-        let hp_token_address = signer::address_of(&hp_token);
+        // beneficiary address containing reserved tokens
+        let beneficiary_address = native_token::get_beneficiary();
+
         let alice_address = signer::address_of(&alice);
         let bob_address = signer::address_of(&bob);
         let igps_address = signer::address_of(&hp_igps);
 
         // check balance pre-transfer
-        let hp_token_balance_pre = coin::balance<AptosCoin>(hp_token_address);
+        let hp_token_balance_pre = coin::balance<AptosCoin>(beneficiary_address);
         let alice_balance_pre = coin::balance<AptosCoin>(alice_address);
         let igps_balance_pre = coin::balance<AptosCoin>(igps_address);
 
@@ -115,7 +118,7 @@ module hp_token::native_tests {
             amount);
 
         // check balance post-transfer
-        let hp_token_balance_post = coin::balance<AptosCoin>(hp_token_address);
+        let hp_token_balance_post = coin::balance<AptosCoin>(beneficiary_address);
         let alice_balance_post = coin::balance<AptosCoin>(alice_address);
         let igps_balance_post = coin::balance<AptosCoin>(igps_address);
 
