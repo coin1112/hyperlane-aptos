@@ -123,9 +123,6 @@ module hp_token::native_token {
         let coin = coin::withdraw<AptosCoin>(&resource_signer, amount);
         coin::deposit<AptosCoin>(recipient, coin);
 
-        std::debug::print<std::string::String>(&std::string::utf8(b"-----bob_address------------"));
-        std::debug::print(&recipient);
-
         // emit SentTransferRemote event;
         let origin_domain = msg_utils::origin_domain(&message);
         event::emit_event<ReceivedTransferRemote>(
